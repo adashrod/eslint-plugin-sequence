@@ -1,6 +1,5 @@
 const rule = require("../../../lib/rules/ordered-imports-by-path");
 var RuleTester = require("eslint").RuleTester;
-
 const ruleTester = new RuleTester({
     parserOptions: {
         ecmaVersion: 6,
@@ -27,14 +26,6 @@ ruleTester.run("ordered-imports-by-path", rule, {
                 `import bravo from "bravo";\n` + 
                 `import Charlie from "Charlie";\n`,
             options: [{ignoreCase: true}]
-        }, {
-            code: `import Util from "util";\n` + 
-                `import { Alpha, Bravo, Charlie } from "alphabet";`,
-            options: [{ignoreDeclarationSort: true}]
-        }, {
-            code: `import { Alpha, Charlie, Bravo } from "alphabet";\n` +
-                `import Util from "util";`,
-            options: [{ignoreMemberSort: true}]
         }, {
             code: `import { Alpha } from "Alpha";\n` + 
                 `import Bravo from "Bravo";\n` + 
@@ -115,19 +106,6 @@ ruleTester.run("ordered-imports-by-path", rule, {
         output: `import alphaFun from "alphaFun";\n` + 
             `import Bravo from "Bravo";`
     }, {
-        code: `import { Bravo, Alpha } from "alphabet";`,
-        errors: [{
-            messageId: "sortMembersAlphabetically"
-        }],
-        output: `import { Alpha, Bravo } from "alphabet";`
-    }, {
-        code: `import { Delta, Echo, Foxtrot, alphaFun, bravoFun, charlieFun } from "alphabet";`,
-        options: [{ignoreCase: true}],
-        errors: [{
-            messageId: "sortMembersAlphabetically"
-        }],
-        output: `import { alphaFun, bravoFun, charlieFun, Delta, Echo, Foxtrot } from "alphabet";`
-    }, {
         code: `import { Alpha } from "Alpha";\n` + 
             `import Bravo from "Bravo";\n` + 
             `import Charlie from "Charlie";\n\n` +
@@ -169,9 +147,8 @@ ruleTester.run("ordered-imports-by-path", rule, {
             `import Bravo from "Bravo";\n` + 
             `import "Cool-script";\n` +
             `import Delta from "Delta";\n`
-    },
     // TypeScript-only, todo: find a parser config to support these
-    // {
+    // }, {
     //     code: `import type { List } from "Collections";\n` +
     //         `import { ArrayList } from "Collections";\n`,
     //     options: [{sortTypeImportsFirst: false}]
@@ -190,61 +167,6 @@ ruleTester.run("ordered-imports-by-path", rule, {
     //     }],
     //     output: `import type { List } from "Collections";\n` +
     //         `import { ArrayList } from "Collections";\n`
-    // }, {
-    {
-        code: `import {\n` +
-            `Bravo, // second letter\n` +
-            `Delta,\n` +
-            `// Alpha,\n` +
-            `Charlie } from "alphabet";`,
-        options: [{sortSpecifiersWithComments: true}],
-        errors: [{
-            messageId: "sortMembersAlphabetically"
-        }],
-        output: `import {\n` +
-            `Bravo, // second letter\n` +
-            `Charlie, Delta,\n` +
-            `// Alpha,\n` + 
-            `} from "alphabet";`
-    }, {
-        code: `import { Echo, Bravo, /* Charlie, Delta,*/ Alpha } from "alphabet";`,
-        options: [{sortSpecifiersWithComments: true}],
-        errors: [{
-            messageId: "sortMembersAlphabetically"
-        }],
-        output: `import { Alpha, Bravo, /* Charlie, Delta,*/ Echo, } from "alphabet";`
-    }, {
-        code: `import util, {\n` +
-            `/* Charlie,\n` +
-            `Delta,*/\n` +
-            `Echo,\n` +
-            `Bravo,\n` +
-            `Alpha } from "alphabet";`,
-        options: [{sortSpecifiersWithComments: true}],
-        errors: [{
-            messageId: "sortMembersAlphabetically"
-        }],
-        output: `import util, {\n` +
-            `/* Charlie,\n` +
-            `Delta,*/\n` +
-            `Alpha, Bravo,\n` +
-            `Echo,\n} from "alphabet";`
-    }, {
-        code: `import {\n` +
-            `// Alpha,\n` +
-            `Echo,\n` +
-            `/* Charlie,\n` +
-            `Delta,*/\n` +
-            `Bravo } from "alphabet";`,
-        options: [{sortSpecifiersWithComments: true}],
-        errors: [{
-            messageId: "sortMembersAlphabetically"
-        }],
-        output: `import {\n` +
-            `// Alpha,\n` +
-            `Bravo, Echo,\n` +
-            `/* Charlie,\n` +
-            `Delta,*/\n` +
-            `} from "alphabet";`
+    // }
     }]
 });

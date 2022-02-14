@@ -1,13 +1,13 @@
 {
     "name": "eslint-plugin-sequence",
-    "version": "0.0.2",
+    "version": "0.1.0",
     "description": "A collection of EsLint rules variously related to sequences: import sorting, ordering, etc",
     "main": "index.js",
     "devDependencies": {
         "eslint": "^8.5.0"
     },
     "scripts": {
-        "test": "node src/tests/lib/rules/ordered-imports-by-path.js",
+        "test": "node src/tests/test-all.js",
         "build": "node build.mjs"
     },
     "type": "commonjs",
