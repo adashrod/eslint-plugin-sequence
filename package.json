@@ -1,19 +1,28 @@
 {
     "name": "eslint-plugin-sequence",
-    "version": "0.0.1",
-    "description": "A collection of EsLint rules variously related to sequences",
+    "version": "0.0.2",
+    "description": "A collection of EsLint rules variously related to sequences: import sorting, ordering, etc",
     "main": "index.js",
     "devDependencies": {
         "eslint": "^8.5.0"
     },
     "scripts": {
-        "test": "node src/tests/lib/rules/ordered-imports-by-path.js"
+        "test": "node src/tests/lib/rules/ordered-imports-by-path.js",
+        "build": "node build.mjs"
     },
     "type": "commonjs",
     "repository": {
         "type": "git",
         "url": "https://github.com/adashrod/eslint-plugin-sequence"
     },
+    "keywords": [
+        "eslint",
+        "eslintplugin",
+        "es6",
+        "modules",
+        "import",
+        "path"
+    ],
     "author": "Aaron Rodriguez",
     "license": "ISC"
 }
