@@ -1,0 +1,90 @@
+# Rule: ordered-import-members
+
+This rule checks that members in import statements are sorted alphabetically in ascending order.
+
+`fixable`: calling EsLint with the `--fix` option rearranges import members.
+
+An example of valid imports under this rule:
+
+```javascript
+import {
+    existsSync,
+    readFileSync,
+    writeFileSync
+} from "fs";
+```
+
+example configuration:
+```javascript
+"rules": {
+    "sequence/ordered-import-members": [
+        "error", {
+            "ignoreCase": true,
+            "sortSpecifiersWithComments": true
+        }
+    ],
+    ...
+}
+```
+
+# Configuration
+
+## ignoreCase
+-------------
+
+type: `boolean`
+
+default: `false`
+
+`false`: sorting is case-sensitive; uppercase letters sort before lowercase, e.g. `import { "A", "D", "E", "b", "c" } from "letters";`
+
+`true`: sorting is done in a case-insensitive manner, e.g. `import { "A", "b", "c", "D", "E" } from "letters";`
+
+## sortSpecifiersWithComments
+-----------------------------
+
+type: `boolean`
+
+default: `false`
+
+Note: this parameter only affects behavior when using `--fix`. It doesn't change anything about how errors/warnings are reported.
+
+Warning: this is an experimental feature; use with caution. It can also cause odd whitespace rearrangement, but does not attempt to fix indentation. It can also cause trailing commas to be inserted after the list of members. Fixing whitespace and removing trailing commas (if desired) should be left to a formatter.
+
+`false`: when using `--fix`, import members are rearranged if there are no surrounding comments.
+
+`true`: when using `--fix`, import members are rearranged even if there are surrounding comments
+
+Examples:
+
+before:
+```javascript
+import { Echo, Bravo, /* Charlie, Delta,*/ Alpha } from "alphabet";
+```
+
+after `--fix`:
+```javascript
+import { Alpha, Bravo, /* Charlie, Delta,*/ Echo, } from "alphabet";
+```
+
+before:
+```javascript
+import {
+    // Alpha,
+    Echo,
+    /* Charlie,
+    Delta,*/
+    Bravo
+} from "alphabet";
+```
+
+after `--fix`:
+```javascript
+import {
+    // Alpha,
+    Bravo,
+Echo,
+    /* Charlie,
+    Delta,*/
+    } from "alphabet";
+```

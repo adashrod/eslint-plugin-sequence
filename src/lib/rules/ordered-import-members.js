@@ -9,25 +9,23 @@ module.exports = {
         docs: {
             description: "enforce sorted import declarations, sorting imports by path, not name and sorted members in imports",
             recommended: false,
-            url: "https://github.com/adashrod/eslint-plugin-sequence"
+            url: "https://github.com/adashrod/eslint-plugin-sequence/tree/main/src/docs/ordered-import-members.md"
         },
 
-        schema: [
-            {
-                type: "object",
-                properties: {
-                    ignoreCase: {
-                        type: "boolean",
-                        default: false
-                    },
-                    sortSpecifiersWithComments: {
-                        type: "boolean",
-                        default: false
-                    }
+        schema: [{
+            type: "object",
+            properties: {
+                ignoreCase: {
+                    type: "boolean",
+                    default: false
                 },
-                additionalProperties: false
-            }
-        ],
+                sortSpecifiersWithComments: {
+                    type: "boolean",
+                    default: false
+                }
+            },
+            additionalProperties: false
+        }],
 
         fixable: "code",
 
