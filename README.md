@@ -20,7 +20,7 @@ npm install --save-dev eslint-plugin-sequence
 ```
 
 Configure with EsLint, e.g. in `.eslintrc.json`
-```json
+```javascript
 
 "plugins": [
     "sequence"
