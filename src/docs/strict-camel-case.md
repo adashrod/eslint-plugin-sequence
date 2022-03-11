@@ -180,7 +180,7 @@ type: `boolean`
 
 default: `false`
 
-Identifiers that are all-caps and contain only one word are inherently ambiguous, e.g. `HTML, JSON, PI, TAU, EPSILON`. Any of these could be names of classes that are in loose camel case, or names of constants that are in all-caps snake case. There's no way to make that determination without know the semantic meaning of them.
+Identifiers that are all-caps and contain only one word are inherently ambiguous, e.g. `HTML, JSON, PI, TAU, EPSILON`. Any of these could be names of classes that are in loose camel case, or names of constants that are in all-caps snake case. There's no way to make that determination without knowing the semantic meaning of them.
 Adding additional words demontstrates how the single-word versions are ambiguous: `HTMLTags, JSONSerializer, TAU_IS_2_PI, EPSILON_UNCERTAINTY`.
 
 `true`: all-caps single-word identifiers are ignored and don't trigger errors (assumed to be all-caps snake case, i.e. constants)

@@ -31,11 +31,14 @@ Configure with EsLint, e.g. in `.eslintrc.json`
     "sequence/ordered-imports-by-path": [
         "error", {
             "ignoreCase": true,
-            "sortSideEffectsFirst": true
+            "sortSideEffectsFirst": true,
+            "allowSeparateGroups": true,
+            "sortTypeImportsFirst": true
         }
     ],
     "sequence/ordered-import-members": [
         "error", {
+            "ignoreCase": true,
             "sortSpecifiersWithComments": true
         }
     ],
