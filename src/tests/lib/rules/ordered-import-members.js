@@ -1,5 +1,5 @@
 const rule = require("../../../lib/rules/ordered-import-members");
-const RuleTester = require("eslint").RuleTester;
+const { RuleTester } = require("eslint");
 
 const ruleTester = new RuleTester({
     parserOptions: {

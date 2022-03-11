@@ -1,5 +1,5 @@
 const rule = require("../../../lib/rules/strict-camel-case");
-const RuleTester = require("eslint").RuleTester;
+const { RuleTester } = require("eslint");
 
 const es5RuleTester = new RuleTester({
     parserOptions: {
