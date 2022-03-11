@@ -55,16 +55,19 @@ Warning: this is an experimental feature; use with caution. It can also cause od
 
 `true`: when using `--fix`, import members are rearranged even if there are surrounding comments
 
+Comments are treated as being attached to a preceding member and are moved together with that member. No attempt is made to alphabetize comment content.
+
 Examples:
 
 before:
 ```javascript
-import { Echo, Bravo, /* Charlie, Delta,*/ Alpha } from "alphabet";
+import { Echo, Bravo, Alpha, /* Charlie, Delta,*/ } from "alphabet";
 ```
 
 after `--fix`:
 ```javascript
-import { Alpha, Bravo, /* Charlie, Delta,*/ Echo, } from "alphabet";
+import { Alpha, /* Charlie, Delta,*/ Bravo, Echo, } from "alphabet";
+// the "Charlie, Delta" comment is treated as attached to the "Alpha" token and moved with it
 ```
 
 before:
@@ -87,4 +90,23 @@ Echo,
     /* Charlie,
     Delta,*/
     } from "alphabet";
+```
+
+before:
+```javascript
+import {
+Bravo, // second letter
+Delta,
+// Alpha,
+Charlie } from "alphabet";
+```
+
+after `--fix`
+```javascript
+import {
+Bravo, // second letter
+Charlie, Delta,
+// Alpha,
+} from "alphabet";
+// "second letter" comment stays with "Bravo" token and "Alpha" comment stays with "Delta" token
 ```

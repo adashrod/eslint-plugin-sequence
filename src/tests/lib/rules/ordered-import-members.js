@@ -1,5 +1,5 @@
 const rule = require("../../../lib/rules/ordered-import-members");
-var RuleTester = require("eslint").RuleTester;
+const RuleTester = require("eslint").RuleTester;
 
 const ruleTester = new RuleTester({
     parserOptions: {
@@ -12,8 +12,8 @@ ruleTester.run("ordered-import-members", rule, {
     valid: [
         `import { Alpha, Bravo, Charlie } from "alphabet";`,
         {
-            code: `import { Alpha } from "Alpha";\n` + 
-                `import bravoFun from "bravoFun";\n` + 
+            code: `import { Alpha } from "Alpha";\n` +
+                `import bravoFun from "bravoFun";\n` +
                 `import Charlie from "Charlie";\n`,
             options: [{ignoreCase: true}]
         },
@@ -70,7 +70,7 @@ ruleTester.run("ordered-import-members", rule, {
         output: `import {\n` +
             `Bravo, // second letter\n` +
             `Charlie, Delta,\n` +
-            `// Alpha,\n` + 
+            `// Alpha,\n` +
             `} from "alphabet";`
     }, {
         code: `import { Echo, Bravo, /* Charlie, Delta,*/ Alpha } from "alphabet";`,

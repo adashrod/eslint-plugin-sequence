@@ -1,3 +1,5 @@
+const { nullishCoalesce } = require("./util/misc-js.js");
+
 /**
  * @fileoverview Rule to enforce ordering of import members by name
  * @author Aaron Rodriguez
@@ -35,18 +37,6 @@ module.exports = {
         }
     },
     create(context) {
-        /**
-         * Similar to the nullish-coalescing operator in JS/TS. Implemented here as a function for node < 14.
-         * Returns left if left is not null and not undefined. Returns right if left either is null or undefined.
-         *
-         * @param {*} left any value
-         * @param {*} right default value if left is null or undefined
-         * @returns {*} left ?? right
-         */
-        function nullishCoalesce(left, right) {
-            return left !== null && left !== undefined ? left : right;
-        }
-
         const configuration = context.options[0] || {},
             ignoreCase = nullishCoalesce(configuration.ignoreCase, false),
             sortSpecifiersWithComments = nullishCoalesce(configuration.sortSpecifiersWithComments, false),

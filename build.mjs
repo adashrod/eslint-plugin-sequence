@@ -19,7 +19,7 @@ function copyDir(dirName) {
             console.error(err);
         }
         files.forEach((fileName) => {
-            copyFile(`${dirName}/${fileName}`, `${distDir}/${dest}/${fileName}`);
+            copyFile(`${dirName}/${fileName}`);
         });
     });
 }
