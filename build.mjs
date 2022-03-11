@@ -19,7 +19,13 @@ function copyDir(dirName) {
             console.error(err);
         }
         files.forEach((fileName) => {
-            copyFile(`${dirName}/${fileName}`);
+            const fullFileName = `${dirName}/${fileName}`;
+            const stats = fs.statSync(fullFileName);
+            if (stats.isDirectory()) {
+                copyDir(fullFileName);
+            } else {
+                copyFile(fullFileName);
+            }
         });
     });
 }
