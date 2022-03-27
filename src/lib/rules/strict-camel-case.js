@@ -522,6 +522,8 @@ module.exports = {
             CatchClause: checkDeclarations,
             ClassDeclaration: checkDeclarations,
             ClassExpression: checkDeclarations,
+            TSInterfaceDeclaration: checkDeclarations,
+            TSEnumDeclaration: checkDeclarations,
             FunctionDeclaration: checkDeclarations,
             FunctionExpression: checkDeclarations,
             VariableDeclaration: checkDeclarations,
@@ -538,6 +540,12 @@ module.exports = {
             "PropertyDefinition > PrivateIdentifier.key": checkClassFieldsMethodsAndObjectFieldsMethods,
             // ---class props `this.xyz = ...`, `window.abc = ...`---
             "MemberExpression > Identifier.property": checkClassFieldsMethodsAndObjectFieldsMethods,
+            // TS interface fields
+            "TSInterfaceDeclaration > TSInterfaceBody > TSPropertySignature > Identifier.key": checkClassFieldsMethodsAndObjectFieldsMethods,
+            // TS interface methods
+            "TSInterfaceDeclaration > TSInterfaceBody > TSMethodSignature > Identifier.key": checkClassFieldsMethodsAndObjectFieldsMethods,
+            // TS enum members
+            "TSEnumDeclaration > TSEnumMember > Identifier.id": checkClassFieldsMethodsAndObjectFieldsMethods,
 
             ImportDeclaration: checkImportDeclarations,
 

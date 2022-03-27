@@ -62,7 +62,7 @@ Further reading:
         "error", {
             "ignoreProperties": false,
             "ignoreImports": false,
-            "ignoredIdentifiers": ["htmlToXML", "legacyAPI"]
+            "ignoredIdentifiers": ["htmlToXML", "legacyAPI"],
             "allowOneCharWords": "last",
             "ignoreSingleWords": false
         }

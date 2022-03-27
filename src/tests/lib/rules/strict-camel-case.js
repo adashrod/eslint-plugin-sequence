@@ -255,10 +255,42 @@ const tsRuleTester = new RuleTester({
 });
 tsRuleTester.run("strict-camel-case", rule, {
     valid: [
-        `class MyClass { private innerHtml: string; }`
+        `class MyClass { private innerHtml: string; }`,
+        `interface MyInterface { aField: number; parseXml(): void; }`,
+        `enum Error { JsError, JS_ERROR }`,
+        {
+            code: `enum HtmlTags { HEAD, BODY, DIV }`,
+            options: [{ ignoredIdentifiers: ["HEAD", "BODY", "DIV"] }]
+        }
     ],
     invalid: [{
         code: `class MyClass { private innerHTML: string; }`,
+        errors: [{
+            messageId: "notCamelCaseWithSuggestion"
+        }]
+    }, {
+        code: `interface MyXMLInterface { xml: string; }`,
+        errors: [{
+            messageId: "notCamelCaseWithSuggestion"
+        }]
+    }, {
+        code: `interface MyInterface { innerHTML: string; }`,
+        errors: [{
+            messageId: "notCamelCaseWithSuggestion"
+        }]
+    }, {
+        code: `interface MyInterface { parseHTML(html: string): any; }`,
+        errors: [{
+            messageId: "notCamelCaseWithSuggestion"
+        }]
+    }, {
+        code: `enum HTMLTags { HEAD, BODY, DIV }`,
+        options: [{ ignoredIdentifiers: ["HEAD", "BODY", "DIV"] }],
+        errors: [{
+            messageId: "notCamelCaseWithSuggestion"
+        }]
+    }, {
+        code: `enum Error { JSError }`,
         errors: [{
             messageId: "notCamelCaseWithSuggestion"
         }]
