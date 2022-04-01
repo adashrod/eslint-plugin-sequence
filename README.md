@@ -14,6 +14,8 @@ Import rules can be used on ES6+ imports, as well as TypeScript imports
 (fixable): sort imported members by name
 ### [strict-camel-case](https://github.com/adashrod/eslint-plugin-sequence/tree/main/src/docs/strict-camel-case.md)
 (*not* fixable): enforce StrictCamelCase style, forbid LOOSECamelCase
+### [logical-expression-complexity](https://github.com/adashrod/eslint-plugin-sequence/tree/main/src/docs/logical-expression-complexity.md)
+(*not* fixable): enforce limits on complexity of logical expressions
 
 ## Installation
 
@@ -50,7 +52,15 @@ Configure with EsLint, e.g. in `.eslintrc.json`
             "allowOneCharWords": "last",
             "ignoreSingleWords": false
         }
-    ]
+    ],
+     "sequence/logical-expression-complexity": [
+        "error", {
+            "maxHeight": 3,
+            "maxTerms": 6,
+            "binaryOperators": ["==", "===", "!=", "!=="],
+            "includeTernary": true
+        }
+    ],
     ...
 }
 ...
