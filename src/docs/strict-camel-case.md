@@ -2,7 +2,9 @@
 
 This rule enforces strict camel case and forbids camel case identifier names that have any all-caps words in them.
 
-`fixable`: *not* fixable due to the complexity of renaming identifiers that can exist across multiple files
+`fixable`: *not* fixable at the command line using `--fix`
+
+`hasSuggestions`: suggestions are provided for IDEs that support making suggested changes
 
 An example of valid names under this rule:
 
@@ -38,7 +40,7 @@ Further reading:
 
 ## Notes about validation and suggested replacements:
 
-1. Although the rule is not fixable, error messages do provide suggestions for replacement strict camel case names. Logic to validate names and generate suggestions use generic Unicode letter matching, and therefore should work for non-english characters.
+1. Although the rule is not fixable at the command line, suggestions are made, which some IDEs can use to make changes on a case-by-case basis. Logic to validate names and generate suggestions use generic Unicode letter matching, and therefore should work for non-english characters.
 
 1. For loose camel case names that have multiple, contiguous all-caps words, the rule has no way of knowing when the words begin and end, so it treats them as one long word, e.g. `JSONAPISerializer` ostensibly means "JSON API serializer", but without prior knowledge of the words "JSON" and "API", it can't know how to properly tokenize the string and instead yields `["JSONAPI", "Serializer"]`, and the suggested replacement would be `JsonapiSerializer`, rather than `JsonApiSerializer`.
 

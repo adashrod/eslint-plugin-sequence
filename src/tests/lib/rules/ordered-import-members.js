@@ -43,8 +43,7 @@ ruleTester.run("ordered-import-members", rule, {
             `Delta,*/\n` +
             `Echo } from "alphabet";`,
     ],
-    invalid: [
-        {
+    invalid: [{
         code: `import { Bravo, Alpha } from "alphabet";`,
         errors: [{
             messageId: "sortMembersAlphabetically"

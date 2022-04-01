@@ -47,6 +47,8 @@ module.exports = {
             additionalProperties: false
         }],
 
+        hasSuggestions: true,
+
         messages: {
             notCamelCaseWithSuggestion:
                 `Identifier "{{name}}" is not in strict camel case, should be "{{suggestion}}".{{debug}}`,
@@ -368,8 +370,9 @@ module.exports = {
 
         /**
          * Reports an AST node as a rule violation.
-         * @param {AstNode} node The node to report.
-         * @private
+         * @param {AstNode}     node        The node to report
+         * @param {string|null} suggestion  suggested replacement, null if none possible
+         * @param {string}      debugMsg    message that gets appended to the error if debug logging is enabled
          */
         function report(node, suggestion, debugMsg) {
             if (reported.has(node.range[0])) {
@@ -386,6 +389,7 @@ module.exports = {
             }
 
             log("DEBUG", `reporting ${buildNodePath(node)} "${node.name}"`);
+            // todo: suggestion
             context.report({
                 node,
                 messageId,
@@ -393,7 +397,13 @@ module.exports = {
                     name: node.name,
                     suggestion,
                     debug: isLogLevelEnabled("DEBUG") ? ` (${debugMsg} ${buildNodePath(node)})` : ""
-                }
+                },
+                suggest: suggestion ? [{
+                    desc: `Replace "${node.name}" with "${suggestion}"`,
+                    fix(fixer) {
+                        return fixer.replaceTextRange(node.range, suggestion);
+                    }
+                }] : null
             });
         }
 
@@ -541,9 +551,11 @@ module.exports = {
             // ---class props `this.xyz = ...`, `window.abc = ...`---
             "MemberExpression > Identifier.property": checkClassFieldsMethodsAndObjectFieldsMethods,
             // TS interface fields
-            "TSInterfaceDeclaration > TSInterfaceBody > TSPropertySignature > Identifier.key": checkClassFieldsMethodsAndObjectFieldsMethods,
+            "TSInterfaceDeclaration > TSInterfaceBody > TSPropertySignature > Identifier.key":
+                checkClassFieldsMethodsAndObjectFieldsMethods,
             // TS interface methods
-            "TSInterfaceDeclaration > TSInterfaceBody > TSMethodSignature > Identifier.key": checkClassFieldsMethodsAndObjectFieldsMethods,
+            "TSInterfaceDeclaration > TSInterfaceBody > TSMethodSignature > Identifier.key":
+                checkClassFieldsMethodsAndObjectFieldsMethods,
             // TS enum members
             "TSEnumDeclaration > TSEnumMember > Identifier.id": checkClassFieldsMethodsAndObjectFieldsMethods,
 

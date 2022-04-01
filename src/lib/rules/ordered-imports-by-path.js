@@ -9,7 +9,8 @@ module.exports = {
         type: "suggestion",
 
         docs: {
-            description: "enforce sorted import declarations, sorting imports by path, not name and sorted members in imports",
+            description:
+                "enforce sorted import declarations, sorting imports by path, not name and sorted members in imports",
             recommended: false,
             url: "https://github.com/adashrod/eslint-plugin-sequence/tree/main/src/docs/ordered-imports-by-path.md"
         },
@@ -40,8 +41,8 @@ module.exports = {
         fixable: "code",
 
         messages: {
-            sortSideEffectsFirst:
-                "Sort side-effects-only modules before others. `{{declarationA}}` should come before `{{declarationB}}`",
+            sortSideEffectsFirst: "Sort side-effects-only modules before others." +
+                "`{{declarationA}}` should come before `{{declarationB}}`",
             sortImportsByPath:
                 "Sort imports alphabetically by path. `{{declarationA}}` should come before `{{declarationB}}`",
             sortTypeImports:

@@ -13,7 +13,7 @@ Import rules can be used on ES6+ imports, as well as TypeScript imports
 ### [ordered-import-members](https://github.com/adashrod/eslint-plugin-sequence/tree/main/src/docs/ordered-import-members.md)
 (fixable): sort imported members by name
 ### [strict-camel-case](https://github.com/adashrod/eslint-plugin-sequence/tree/main/src/docs/strict-camel-case.md)
-(*not* fixable): enforce StrictCamelCase style, forbid LOOSECamelCase
+(fixable via suggestions): enforce StrictCamelCase style, forbid LOOSECamelCase
 ### [logical-expression-complexity](https://github.com/adashrod/eslint-plugin-sequence/tree/main/src/docs/logical-expression-complexity.md)
 (*not* fixable): enforce limits on complexity of logical expressions
 
