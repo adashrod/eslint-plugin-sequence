@@ -2,7 +2,7 @@
 
 ![github actions](https://github.com/adashrod/eslint-plugin-sequence/actions/workflows/node.js.yml/badge.svg)
 [![npm](https://img.shields.io/npm/v/eslint-plugin-sequence.svg)](https://www.npmjs.com/package/eslint-plugin-sequence)
-<!--[![npm downloads](https://img.shields.io/npm/dt/eslint-plugin-sequence.svg?maxAge=2592000)](https://www.npmtrends.com/eslint-plugin-sequence)-->
+[![npm downloads](https://img.shields.io/npm/dt/eslint-plugin-sequence.svg?maxAge=2592000)](https://www.npmtrends.com/eslint-plugin-sequence)
 
 A collection of [EsLint](https://github.com/eslint/eslint) rules variously related to sequences: sequences of imports, import members, characters, and other elements.
 
