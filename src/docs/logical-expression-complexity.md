@@ -43,7 +43,7 @@ a && b && (c !== d)     (a && b) !== (c && d)   a && (b ? c : d)        a && (b 
 a    b   c     d        a    b                      b   c   d              b     c
 ```
 
-Examples 6a and 7a strict inequality comparison, 8a the ternary operator, and 9a strict equality comparison. With these operators enabled, the operators and their child nodes are included in the trees and count toward the height and node calculations. The figures below show the same expressions using different configs:
+Examples 6a and 7a show strict inequality comparison, 8a the ternary operator, and 9a less-than comparison. With these operators enabled, the operators and their child nodes are included in the trees and count toward the height and node calculations. The figures below show the same expressions using different configs:
 
 ```
 // binaryOperators: [], includeTernary: false
@@ -113,7 +113,7 @@ type: `number`
 
 default: `4`
 
-The maximum allowed number of terms in a logical expression. If enabled this counts the number of qualifying nodes in an expression tree and compares to the max. A value less than or equal to zero disables this check. The simplest logical expression using only the NOT (`!`) operator has one term; The simplest using binary operators (`&&`, `||`) have two terms. As such, setting this parameter to `1` would completely forbid usage of `&&` and `||` and is of limited utility.
+The maximum allowed number of terms in a logical expression. If enabled this counts the number of qualifying nodes in an expression tree and compares to the max. A value less than or equal to zero disables this check. The simplest logical expression using only the NOT (`!`) operator has one term; The simplest using binary operators (`&&`, `||`, `??`) have two terms. As such, setting this parameter to `1` would completely forbid usage of `&&`, `||` and `??` and is of limited utility.
 
 ## binaryOperators
 ---
@@ -124,7 +124,7 @@ values: `"==", "===", "!=", "!==", "<", "<=", ">", ">="`
 
 default: `[]`
 
-By default, the only binary operators included when calculating complexity are the logical operators (`&&`, `||`, `??`). E.g. `a && b !== c && d` would be interpreted as two distinct expressions `a && b` and  `c && d`. If you wish to count any of the comparison operators (`==`, `===`, `!=`, `!==`, `<`, `<=`, `>`, `>=`) toward expression complexity, add them to the `binaryOperators` array.
+By default, the only binary operators included when calculating complexity are the logical operators (`&&`, `||`, `??`). E.g. `(a && b) !== (c && d)` would be interpreted as two distinct expressions `a && b` and  `c && d`. If you wish to count any of the comparison operators (`==`, `===`, `!=`, `!==`, `<`, `<=`, `>`, `>=`) toward expression complexity, add them to the `binaryOperators` array.
 
 Note: `==` and `===` are considered different operators, as are `!=` and `!==`, so if you include in/equality, you would probably also want to include the strict version and vice versa.
 
