@@ -244,22 +244,21 @@ module.exports = {
                             typeStyle
                         },
                         fix(fixer) {
+                            const originalLastImport = importGroup[importGroup.length - 1];
                             const replacementText = importGroup.slice()
                                 .sort(importDeclarationComparator)
                                 .map(declaration => {
-                                    const commentsAfter = sourceCode.getCommentsAfter(declaration);
+                                    // ignore comments after the last import because they might semantically be comments
+                                    // before code following the imports, e.g. class header documentation
+                                    const commentsAfter = declaration !== originalLastImport ?
+                                        sourceCode.getCommentsAfter(declaration) : [];
                                     return sourceCode.getText().slice(declaration.range[0],
                                         commentsAfter.length ?
                                             commentsAfter[commentsAfter.length - 1].range[1] :
                                             declaration.range[1]);
                                 })
                                 .join("\n");
-                            const originalLastImport = importGroup[importGroup.length - 1];
-                            const commentsAfter = sourceCode.getCommentsAfter(originalLastImport);
-                            const importGroupEnd = commentsAfter.length ?
-                                commentsAfter[commentsAfter.length - 1].range[1] :
-                                originalLastImport.range[1];
-                            return fixer.replaceTextRange([importGroup[0].range[0], importGroupEnd],
+                            return fixer.replaceTextRange([importGroup[0].range[0], originalLastImport.range[1]],
                                 replacementText);
                         }
                     });

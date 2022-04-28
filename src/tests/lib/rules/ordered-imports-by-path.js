@@ -138,13 +138,35 @@ esRuleTester.run("ordered-imports-by-path", rule, {
             `import Bravo from "Bravo";\n` +
             `import "Cool-script";\n` +
             `import Delta from "Delta";\n`
+    }, {
+        code: `import BinarySearch from "app/algorithms/binary-search";\n` +
+            `import OrderedPair from "app/common/ordered-pair";\n` +
+            `import Monolith from "app/models/monolith";\n` +
+            `import Direction from "app/direction";\n\n` +
+
+            `/**\n` +
+            ` * This is a very informative and thorough piece of documentation\n` +
+            ` */\n` +
+            `class Application {}`,
+        errors: [{
+            messageId: "sortImportsByPath"
+        }],
+        output: `import BinarySearch from "app/algorithms/binary-search";\n` +
+            `import OrderedPair from "app/common/ordered-pair";\n` +
+            `import Direction from "app/direction";\n` +
+            `import Monolith from "app/models/monolith";\n\n` +
+
+            `/**\n` +
+            ` * This is a very informative and thorough piece of documentation\n` +
+            ` */\n` +
+            `class Application {}`
     }]
 });
 
 const tsRuleTester = new RuleTester({
     parser: require.resolve('@typescript-eslint/parser')
 });
-tsRuleTester.run("", rule, {
+tsRuleTester.run("ordered-imports-by-path", rule, {
     valid: [{
         code: `import { ArrayList } from "Collections";\n` +
             `import type { List } from "Collections";\n`,
