@@ -1,6 +1,6 @@
 {
     "name": "eslint-plugin-sequence",
-    "version": "0.3.0",
+    "version": "0.3.1",
     "description": "A collection of EsLint rules variously related to sequences: import sorting, ordering, etc",
     "main": "index.js",
     "devDependencies": {
@@ -27,7 +27,9 @@
         "es6",
         "modules",
         "import",
-        "path"
+        "path",
+        "complexity",
+        "camelcase"
     ],
     "author": "Aaron Rodriguez",
     "license": "ISC"
