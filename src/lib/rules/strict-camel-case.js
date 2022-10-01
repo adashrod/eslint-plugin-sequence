@@ -389,7 +389,6 @@ module.exports = {
             }
 
             log("DEBUG", `reporting ${buildNodePath(node)} "${node.name}"`);
-            // todo: suggestion
             context.report({
                 node,
                 messageId,
