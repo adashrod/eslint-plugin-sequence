@@ -36,11 +36,11 @@ The exact number of terms and the measured height reported by the rule can vary 
 6a                      7a                      8a                      9a
 a && b && (c !== d)     (a && b) !== (c && d)   a && (b ? c : d)        a && (b < c)
 
-       &&                   !==                     &&                    &&
-     /    \                /   \                  /    \                 /  \
-  &&       !==            &&    c               a       ?:              a     <
- /  \     /   \          /  \                        /  |  \                /   \
-a    b   c     d        a    b                      b   c   d              b     c
+       &&                     !==                   &&                    &&
+     /    \                  /   \                /    \                 /  \
+  &&       !==            &&       &&           a       ?:              a     <
+ /  \     /   \          /  \     /  \               /  |  \                /   \
+a    b   c     d        a    b   c    d             b   c   d              b     c
 ```
 
 Examples 6a and 7a show strict inequality comparison, 8a the ternary operator, and 9a less-than comparison. With these operators enabled, the operators and their child nodes are included in the trees and count toward the height and node calculations. The figures below show the same expressions using different configs:
