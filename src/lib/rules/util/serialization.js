@@ -1,10 +1,7 @@
 const tab = "    ";
 
 function helper(obj, indent, cache, path) {
-    const theIndent = indent || "";
-    const theCache = cache || [];
-    const thePath = path || "<root>";
-    const found = theCache.find(cacheItem => cacheItem[0] === obj);
+    const found = cache.find(cacheItem => cacheItem[0] === obj);
     if (found) {
         return `<circular> (${found[1]})`;
     }
@@ -21,24 +18,24 @@ function helper(obj, indent, cache, path) {
         return `"${obj}"`;
     }
     if (Array.isArray(obj)) {
-        theCache.push([obj, thePath]);
+        cache.push([obj, path]);
         if (obj.length === 0) {
             return "[]";
         }
         let builder = "[\n";
         for (let i = 0; i < obj.length; i++) {
             const element = obj[i];
-            const rec = helper(element, theIndent + tab, theCache, `${thePath}[${i}]`);
-            builder += `${theIndent + tab}${rec}`;
+            const rec = helper(element, indent + tab, cache, `${path}[${i}]`);
+            builder += `${indent + tab}${rec}`;
             if (i + 1 < obj.length) {
                 builder += ","
             }
             builder += "\n";
         }
-        return builder + `${theIndent}]`;
+        return builder + `${indent}]`;
     }
     if (typeof obj === "object") {
-        theCache.push([obj, thePath]);
+        cache.push([obj, path]);
         const entries = Object.entries(obj);
         if (entries.length === 0) {
             return "{}";
@@ -46,18 +43,19 @@ function helper(obj, indent, cache, path) {
         let builder = "{\n";
         for (let i = 0; i < entries.length; i++) {
             const entry = entries[i];
-            const rec = helper(entry[1], theIndent + tab, theCache, `${thePath}.${entry[0]}`);
-            builder += `${theIndent + tab}"${entry[0]}": ${rec}`;
+            const rec = helper(entry[1], indent + tab, cache, `${path}.${entry[0]}`);
+            builder += `${indent + tab}"${entry[0]}": ${rec}`;
             if (i + 1 < entries.length) {
                 builder += ",";
             }
             builder += "\n";
         }
-        return builder + `${theIndent}}`;
+        return builder + `${indent}}`;
     }
     if (typeof obj === "function") {
         return obj.toString().slice(0, 30) + "...";
     }
+    return "unknown";
 }
 
 module.exports = {
@@ -71,7 +69,7 @@ module.exports = {
      *     meta: {
      *         name: "my object"
      *     }
-     * }
+     * };
      * obj.name = obj.meta.name;
      *
      * objectToString(obj) -->
@@ -87,6 +85,6 @@ module.exports = {
      * @returns a JSON-like string
      */
     objectToString(object) {
-        return helper(object);
+        return helper(object, "", [], "<root>");
     }
 };

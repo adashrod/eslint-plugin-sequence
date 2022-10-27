@@ -10,7 +10,7 @@ module.exports = {
 
         docs: {
             description:
-                "enforce sorted import declarations, sorting imports by path, not name and sorted members in imports",
+                "enforce sorted import declarations, sorting imports by path",
             recommended: false,
             url: "https://github.com/adashrod/eslint-plugin-sequence/tree/main/src/docs/ordered-imports-by-path.md"
         },

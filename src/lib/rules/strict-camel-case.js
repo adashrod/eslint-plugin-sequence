@@ -496,7 +496,7 @@ module.exports = {
                         report(identifier, response.suggestion, "ImportDefaultSpec/ImportNamespaceSpecifier");
                     } else if (identifier.name !== identifier.parent.imported.name) {
                         log("TRACE", () => [`ImportDeclaration reporting named import ${variable.name}`,
-                        objectToString(identifier)]);
+                            objectToString(identifier)]);
                         report(identifier, response.suggestion, "Import");
                     } else {
                         // for non-renamed non-default imports (`import { htmlToXML } from "..."`),

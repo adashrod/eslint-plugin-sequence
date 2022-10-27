@@ -10,7 +10,7 @@ module.exports = {
 
         docs: {
             description:
-                "enforce sorted import declarations, sorting imports by path, not name and sorted members in imports",
+                "enforce sorted members in individual imports",
             recommended: false,
             url: "https://github.com/adashrod/eslint-plugin-sequence/tree/main/src/docs/ordered-import-members.md"
         },
@@ -69,7 +69,7 @@ module.exports = {
                 token.type === "Punctuator" &&
                 token.value === punctuator &&
                 token.range[0] >= startPos
-            )
+            );
         }
 
         /**
@@ -118,7 +118,7 @@ module.exports = {
         /**
          * Given a list of specifiers that need to be sorted, and do have surrounding comments, sort them by specifier
          * name, maintaining comments relative to specifiers.
-         * E.g.before:
+         * E.g. before:
          * import {
          *     B, // beautiful
          *     A // awesome

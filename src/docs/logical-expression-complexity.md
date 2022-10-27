@@ -61,7 +61,7 @@ is treated as a leaf    !== isn't part of a     treated as a leaf node. treated 
 node. only 3 terms      logical expression      only 2 terms            only 2 terms
 ```
 
-6b's logical expression tree now has a leaf node to the right of the root in place of the whole ternary expression. 7b is now 2 separate trees because the `!==` operator is not included in analyzing logical expressions. Like 6b, 8b and 9b also show that when an unsupported operator is below the root, it is treated as a leaf node and its children are ignored in this particular tree. If its children contain logical expressions, they will be analyzed separately.
+6b's logical expression tree now has a leaf node to the right of the root in place of the whole ternary expression. 7b is now 2 separate trees because the `!==` operator is not included in analyzing logical expressions. Like 6b, 8b and 9b also show that when an unsupported operator is below the root, it is treated as a leaf node and its children are ignored in this particular tree. If its children contain logical expressions, they will be analyzed as separate trees.
 
 example configuration:
 ```javascript
