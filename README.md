@@ -53,7 +53,7 @@ Configure with EsLint, e.g. in `.eslintrc.json`
             "ignoreSingleWords": false
         }
     ],
-     "sequence/logical-expression-complexity": [
+    "sequence/logical-expression-complexity": [
         "error", {
             "maxHeight": 3,
             "maxTerms": 6,

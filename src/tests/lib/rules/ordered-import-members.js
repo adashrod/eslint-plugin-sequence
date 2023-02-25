@@ -1,14 +1,14 @@
 const rule = require("../../../lib/rules/ordered-import-members");
 const { RuleTester } = require("eslint");
 
-const ruleTester = new RuleTester({
+const esRuleTester = new RuleTester({
     parserOptions: {
         ecmaVersion: 6,
         sourceType: "module",
     }
 });
 
-ruleTester.run("ordered-import-members", rule, {
+esRuleTester.run("ordered-import-members", rule, {
     valid: [
         `import { Alpha, Bravo, Charlie } from "alphabet";`,
         {
@@ -111,5 +111,22 @@ ruleTester.run("ordered-import-members", rule, {
             `/* Charlie,\n` +
             `Delta,*/\n` +
             `} from "alphabet";`
+    }]
+});
+
+const tsRuleTester = new RuleTester({
+    parser: require.resolve('@typescript-eslint/parser')
+});
+
+tsRuleTester.run("ordered-import-members", rule, {
+    valid: [`import { annoying, requirement, requires, valid } from "ugh";`],
+    invalid: [{
+        code: `import type { OnInit } from "@angular/core";\n` +
+            `import { ElementRef, HostListener, Directive, Input } from "@angular/core";`,
+        errors: [{
+            messageId: "sortMembersAlphabetically"
+        }],
+        output: `import type { OnInit } from "@angular/core";\n` +
+            `import { Directive, ElementRef, HostListener, Input } from "@angular/core";`
     }]
 });
