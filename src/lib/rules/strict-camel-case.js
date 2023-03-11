@@ -543,9 +543,9 @@ module.exports = {
             "MethodDefinition > Identifier.key": checkClassFieldsMethodsAndObjectFieldsMethods,
             // ---TS-only: class instance props---
             "PropertyDefinition > Identifier.key": checkClassFieldsMethodsAndObjectFieldsMethods,
-            // class { #privPropName = ...; }
-            "MethodDefinition > PrivateIdentifier.key": checkClassFieldsMethodsAndObjectFieldsMethods,
             // class { #privFunc() {...} }
+            "MethodDefinition > PrivateIdentifier.key": checkClassFieldsMethodsAndObjectFieldsMethods,
+            // class { #privPropName = ...; }
             "PropertyDefinition > PrivateIdentifier.key": checkClassFieldsMethodsAndObjectFieldsMethods,
             // ---class props `this.xyz = ...`, `window.abc = ...`---
             "MemberExpression > Identifier.property": checkClassFieldsMethodsAndObjectFieldsMethods,
