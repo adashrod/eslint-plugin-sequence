@@ -6,6 +6,11 @@ This rule enforces strict camel case and forbids camel case identifier names tha
 
 `hasSuggestions`: suggestions are provided for IDEs that support making suggested changes
 
+#### Suggestion screenshot:
+
+![VsCode screenshot](https://github.com/adashrod/eslint-plugin-sequence/blob/main/src/docs/images/strictCamelCaseQuickFix.jpg)
+
+
 An example of valid names under this rule:
 
 ```javascript
