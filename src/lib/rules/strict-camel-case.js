@@ -555,6 +555,8 @@ module.exports = {
             // TS interface methods
             "TSInterfaceDeclaration > TSInterfaceBody > TSMethodSignature > Identifier.key":
                 checkClassFieldsMethodsAndObjectFieldsMethods,
+            "TSTypeAliasDeclaration > TSTypeLiteral > TSPropertySignature > Identifier.key":
+                checkClassFieldsMethodsAndObjectFieldsMethods,
             // TS enum members
             "TSEnumDeclaration > TSEnumMember > Identifier.id": checkClassFieldsMethodsAndObjectFieldsMethods,
 

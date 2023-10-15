@@ -257,6 +257,7 @@ tsRuleTester.run("strict-camel-case", rule, {
     valid: [
         `class MyClass { private innerHtml: string; }`,
         `interface MyInterface { aField: number; parseXml(): void; }`,
+        `type MyType = { aField: number, anotherField: string }`,
         `enum Error { JsError, JS_ERROR }`,
         {
             code: `enum HtmlTags { HEAD, BODY, DIV }`,
@@ -280,6 +281,16 @@ tsRuleTester.run("strict-camel-case", rule, {
         }]
     }, {
         code: `interface MyInterface { parseHTML(html: string): any; }`,
+        errors: [{
+            messageId: "notCamelCaseWithSuggestion"
+        }]
+    }, {
+        code: `type MyType = { someHTML: string }`,
+        errors: [{
+            messageId: "notCamelCaseWithSuggestion"
+        }]
+    }, {
+        code: `type MyType = { aBoolean: boolean, someHTML: string }`,
         errors: [{
             messageId: "notCamelCaseWithSuggestion"
         }]
