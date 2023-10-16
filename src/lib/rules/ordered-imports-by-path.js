@@ -1,5 +1,3 @@
-const { nullishCoalesce } = require("./util/misc-js.js");
-
 /**
  * @fileoverview Rule to enforce ordering of imports by path
  * @author Aaron Rodriguez
@@ -52,10 +50,10 @@ module.exports = {
     },
     create(context) {
         const configuration = context.options[0] || {},
-            ignoreCase = nullishCoalesce(configuration.ignoreCase, false),
-            allowSeparateGroups = nullishCoalesce(configuration.allowSeparateGroups, true),
-            sortTypeImportsFirst = nullishCoalesce(configuration.sortTypeImportsFirst, true),
-            sortSideEffectsFirst = nullishCoalesce(configuration.sortSideEffectsFirst, false),
+            ignoreCase = configuration.ignoreCase ?? false,
+            allowSeparateGroups = configuration.allowSeparateGroups ?? true,
+            sortTypeImportsFirst = configuration.sortTypeImportsFirst ?? true,
+            sortSideEffectsFirst = configuration.sortSideEffectsFirst ?? false,
             sourceCode = context.getSourceCode();
 
         /**

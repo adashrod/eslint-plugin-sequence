@@ -1,4 +1,3 @@
-const { nullishCoalesce } = require("./util/misc-js.js");
 const { objectToString } = require("./util/serialization.js");
 
 /**
@@ -64,11 +63,11 @@ module.exports = {
 
     create(context) {
         const options = context.options[0] || {},
-            ignoreProperties = nullishCoalesce(options.ignoreProperties, false),
-            ignoreImports = nullishCoalesce(options.ignoreImports, false),
+            ignoreProperties = options.ignoreProperties ?? false,
+            ignoreImports = options.ignoreImports ?? false,
             ignoredIdentifiers = options.ignoredIdentifiers || [],
             allowOneCharWords = options.allowOneCharWords || "never",
-            ignoreSingleWords = nullishCoalesce(options.ignoreSingleWords, false);
+            ignoreSingleWords = options.ignoreSingleWords ?? false;
 
         const LOG_RULE_PREFIX = "eslint-plugin-sequence/strict-camel-case ";
         const LEVELS = ["OFF", "FATAL", "ERROR", "WARN", "INFO", "DEBUG", "TRACE"];

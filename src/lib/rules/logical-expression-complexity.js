@@ -1,5 +1,3 @@
-const { nullishCoalesce } = require("./util/misc-js.js");
-
 /**
  * @fileoverview Rule to flag overly complex logical expressions
  * @author Aaron Rodriguez
@@ -50,10 +48,10 @@ module.exports = {
     },
     create(context) {
         const configuration = context.options[0] || {},
-            maxHeight = nullishCoalesce(configuration.maxHeight, 2),
-            maxTerms = nullishCoalesce(configuration.maxTerms, 4),
-            binaryOperators = nullishCoalesce(configuration.binaryOperators, []),
-            includeTernary = nullishCoalesce(configuration.includeTernary, true);
+            maxHeight = configuration.maxHeight ?? 2,
+            maxTerms = configuration.maxTerms ?? 4,
+            binaryOperators = configuration.binaryOperators ?? [],
+            includeTernary = configuration.includeTernary ?? true;
 
         const heightObserved = new Set();
         const countObserved = new Set();

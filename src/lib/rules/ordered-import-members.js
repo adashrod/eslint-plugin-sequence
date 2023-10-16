@@ -1,5 +1,4 @@
 const { findPunctuatorAfter, findPunctuatorBetween } = require("./util/ast.js");
-const { nullishCoalesce } = require("./util/misc-js.js");
 
 /**
  * @fileoverview Rule to enforce ordering of import members by name
@@ -40,8 +39,8 @@ module.exports = {
     },
     create(context) {
         const configuration = context.options[0] || {},
-            ignoreCase = nullishCoalesce(configuration.ignoreCase, false),
-            sortSpecifiersWithComments = nullishCoalesce(configuration.sortSpecifiersWithComments, false),
+            ignoreCase = configuration.ignoreCase ?? false,
+            sortSpecifiersWithComments = configuration.sortSpecifiersWithComments ?? false,
             sourceCode = context.getSourceCode();
 
         /**
