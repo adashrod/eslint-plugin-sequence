@@ -547,7 +547,7 @@ module.exports = {
             // class { #privPropName = ...; }
             "PropertyDefinition > PrivateIdentifier.key": checkClassFieldsMethodsAndObjectFieldsMethods,
             // ---class props `this.xyz = ...`, `window.abc = ...`---
-            "MemberExpression > Identifier.property": checkClassFieldsMethodsAndObjectFieldsMethods,
+            "AssignmentExpression > MemberExpression > Identifier.property": checkClassFieldsMethodsAndObjectFieldsMethods,
             // TS interface fields
             "TSInterfaceDeclaration > TSInterfaceBody > TSPropertySignature > Identifier.key":
                 checkClassFieldsMethodsAndObjectFieldsMethods,
