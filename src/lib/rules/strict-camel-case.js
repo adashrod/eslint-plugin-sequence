@@ -41,6 +41,20 @@ module.exports = {
                 ignoreSingleWords: {
                     type: "boolean",
                     default: false
+                },
+                ignoreSingleWordsIn: {
+                    type: "array",
+                    items: [{
+                        type: "string",
+                        enum: [
+                            "enum_member",
+                            "first_class_constant",
+                            "object_field",
+                            "static_class_field"
+                        ]
+                    }],
+                    minItems: 0,
+                    uniqueItems: true
                 }
             },
             additionalProperties: false
@@ -67,7 +81,8 @@ module.exports = {
             ignoreImports = options.ignoreImports ?? false,
             ignoredIdentifiers = options.ignoredIdentifiers || [],
             allowOneCharWords = options.allowOneCharWords || "never",
-            ignoreSingleWords = options.ignoreSingleWords ?? false;
+            ignoreSingleWords = options.ignoreSingleWords ?? false,
+            ignoreSingleWordsIn = options.ignoreSingleWordsIn ?? [];
 
         const LOG_RULE_PREFIX = "eslint-plugin-sequence/strict-camel-case ";
         const LEVELS = ["OFF", "FATAL", "ERROR", "WARN", "INFO", "DEBUG", "TRACE"];
@@ -435,8 +450,12 @@ module.exports = {
             }
         }
 
-        function checkDeclarations(node) {
+        function checkDeclarations(node, exemptionType) {
             for (const variable of context.getDeclaredVariables(node)) { // funcName+params, mult var decl in one stmt
+                if (ignoreSingleWordsIn.includes(exemptionType) && node.kind === "const" && isAllCaps(variable.name)) {
+                    log("TRACE", `variable declarations skipping node.name=${node.name} due to config`);
+                    continue;
+                }
                 log("DEBUG", `*Declaration checking variable.name=${variable.name}`);
                 const response = checkValidityAndGetSuggestion(variable.name);
                 if (response.valid) {
@@ -461,8 +480,8 @@ module.exports = {
             }
         }
 
-        function checkClassFieldsMethodsAndObjectFieldsMethods(node) {
-            if (!ignoreProperties) {
+        function checkClassFieldsMethodsAndObjectFieldsMethods(node, exemptionType) {
+            if (!ignoreProperties && !(ignoreSingleWordsIn.includes(exemptionType) && isAllCaps(node.name))) {
                 log("DEBUG", `class/object field/method declarations checking ${node.name}`);
                 const response = checkValidityAndGetSuggestion(node.name);
                 if (!response.valid) {
@@ -474,6 +493,15 @@ module.exports = {
             } else {
                 log("TRACE", `field/method declarations skipping node.name=${node.name} due to config`);
             }
+        }
+
+        function checkClassFields(node) {
+            const propDef = node.parent;
+            if (ignoreSingleWordsIn.includes("static_class_field") && propDef.static && isAllCaps(node.name)) {
+                log("TRACE", `static field declarations skipping node.name=${node.name} due to config`);
+                return;
+            }
+            checkClassFieldsMethodsAndObjectFieldsMethods(node);
         }
 
         function checkImportDeclarations(node) {
@@ -534,20 +562,20 @@ module.exports = {
             TSEnumDeclaration: checkDeclarations,
             FunctionDeclaration: checkDeclarations,
             FunctionExpression: checkDeclarations,
-            VariableDeclaration: checkDeclarations,
+            VariableDeclaration: node => checkDeclarations(node, "first_class_constant"),
 
             // ---object literals---
-            "ObjectExpression > Property > Identifier.key": checkClassFieldsMethodsAndObjectFieldsMethods,
+            "ObjectExpression > Property > Identifier.key": node => checkClassFieldsMethodsAndObjectFieldsMethods(node, "object_field"),
             // ---instance functions on classes---
             "MethodDefinition > Identifier.key": checkClassFieldsMethodsAndObjectFieldsMethods,
-            // ---TS-only: class instance props---
-            "PropertyDefinition > Identifier.key": checkClassFieldsMethodsAndObjectFieldsMethods,
+            // ---TS-only: class instance and static props---
+            "PropertyDefinition > Identifier.key": checkClassFields,
             // class { #privFunc() {...} }
             "MethodDefinition > PrivateIdentifier.key": checkClassFieldsMethodsAndObjectFieldsMethods,
             // class { #privPropName = ...; }
             "PropertyDefinition > PrivateIdentifier.key": checkClassFieldsMethodsAndObjectFieldsMethods,
             // ---class props `this.xyz = ...`, `window.abc = ...`---
-            "MemberExpression > Identifier.property": checkClassFieldsMethodsAndObjectFieldsMethods,
+            "AssignmentExpression > MemberExpression > Identifier.property": checkClassFieldsMethodsAndObjectFieldsMethods,
             // TS interface fields
             "TSInterfaceDeclaration > TSInterfaceBody > TSPropertySignature > Identifier.key":
                 checkClassFieldsMethodsAndObjectFieldsMethods,
@@ -557,7 +585,7 @@ module.exports = {
             "TSTypeAliasDeclaration > TSTypeLiteral > TSPropertySignature > Identifier.key":
                 checkClassFieldsMethodsAndObjectFieldsMethods,
             // TS enum members
-            "TSEnumDeclaration > TSEnumMember > Identifier.id": checkClassFieldsMethodsAndObjectFieldsMethods,
+            "TSEnumDeclaration > TSEnumMember > Identifier.id": node => checkClassFieldsMethodsAndObjectFieldsMethods(node, "enum_member"),
 
             ImportDeclaration: checkImportDeclarations,
 
