@@ -99,7 +99,14 @@ es13RuleTester.run("strict-camel-case", rule, {
         `import * as fs from "fs";`,
         `import { exec as doExec } from "child_process";`,
         `import { notMyFAULT } from "badNames";`,
-        `import { notMyFAULT as betterName } from "badNames";`
+        `import { notMyFAULT as betterName } from "badNames";`,
+        {
+            code: `export const MAX = 10;`,
+            options: [{ ignoreSingleWordsIn: [ "first_class_constant" ] }]
+        }, {
+            code: `const esEnumDirection = { NORTH: 0, EAST: 1, SOUTH: 2, WEST: 3 }`,
+            options: [{ ignoreSingleWordsIn: [ "object_field" ] }]
+        }
     ],
     invalid: [{
         code: `let xmlToHTML = () => {};`,
@@ -247,6 +254,32 @@ es13RuleTester.run("strict-camel-case", rule, {
         errors: [{
             messageId: "notCamelCaseWithSuggestion"
         }]
+    }, {
+        code: `export const MAX = 10;`,
+        errors: [{
+            messageId: "notCamelCaseWithSuggestion"
+        }]
+    }, {
+        code: `export let MAX = 10;`,
+        errors: [{
+            messageId: "notCamelCaseWithSuggestion"
+        }]
+    }, {
+        code: `export var MAX = 10;`,
+        errors: [{
+            messageId: "notCamelCaseWithSuggestion"
+        }]
+    }, {
+        code: `const esEnumDirection = { NORTH: 0, EAST: 1, SOUTH: 2, WEST: 3 }`,
+        errors: [{
+            message: 'Identifier "NORTH" is not in strict camel case, should be "North".',
+        }, {
+            message: 'Identifier "EAST" is not in strict camel case, should be "East".',
+        }, {
+            message: 'Identifier "SOUTH" is not in strict camel case, should be "South".',
+        }, {
+            message: 'Identifier "WEST" is not in strict camel case, should be "West".',
+        }]
     }]
 });
 
@@ -262,6 +295,14 @@ tsRuleTester.run("strict-camel-case", rule, {
         {
             code: `enum HtmlTags { HEAD, BODY, DIV }`,
             options: [{ ignoredIdentifiers: ["HEAD", "BODY", "DIV"] }]
+        },
+        {
+            code: `enum Direction { NORTH, EAST, SOUTH, WEST }`,
+            options: [{ ignoreSingleWordsIn: ["enum_member"]}]
+        },
+        {
+            code: `class Util { public static NAME = "TheUtil"; }`,
+            options: [{ ignoreSingleWordsIn: ["static_class_field"]}]
         }
     ],
     invalid: [{
@@ -302,6 +343,24 @@ tsRuleTester.run("strict-camel-case", rule, {
         }]
     }, {
         code: `enum Error { JSError }`,
+        errors: [{
+            messageId: "notCamelCaseWithSuggestion"
+        }]
+    },
+    {
+        code: `enum Direction { NORTH, EAST, SOUTH, WEST }`,
+        errors: [{
+            message: 'Identifier "NORTH" is not in strict camel case, should be "North".',
+        }, {
+            message: 'Identifier "EAST" is not in strict camel case, should be "East".',
+        }, {
+            message: 'Identifier "SOUTH" is not in strict camel case, should be "South".',
+        }, {
+            message: 'Identifier "WEST" is not in strict camel case, should be "West".',
+        }]
+    },
+{
+        code: `class Util { public static NAME = "TheUtil"; }`,
         errors: [{
             messageId: "notCamelCaseWithSuggestion"
         }]

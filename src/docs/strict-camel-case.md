@@ -71,7 +71,8 @@ Further reading:
             "ignoreImports": false,
             "ignoredIdentifiers": ["htmlToXML", "legacyAPI"],
             "allowOneCharWords": "last",
-            "ignoreSingleWords": false
+            "ignoreSingleWords": false,
+            "ignoreSingleWordsIn": ["enum_member", "static_class_field"]
         }
     ],
     ...
@@ -149,7 +150,7 @@ values: `"never" | "always" | "last"`
 
 default `"never"`
 
-Since tokens in camel case have one letter capitalized and the rest lowercase, a 1-letter word can create problems for camel case because, even following strict camel case, there could be contiguous uppercase letters, e.g. `ThisIsAClass`. This option allows some control over how to handle that.
+Since tokens in camel case have one letter capitalized and the rest lowercase, a 1-letter word can create problems for camel case because, even following strict camel case, there could be contiguous uppercase letters, e.g. `ThisIsAClass`. This option allows some control over how to handle that. Note: when identifiers trigger an error due to this configuration, the lint rule will not provide a suggestion, because none exists.
 
 `"never"`: 1-letter, uppercase words are considered invalid
 ```javascript
@@ -179,13 +180,59 @@ function getX() {}
 class A {}
 ```
 
+## ignoreSingleWordsIn
+---
 
-## ignoreSingleWords
+type: `enum[]`
+
+values: `"enum_member" | "first_class_constant" | "object_field" | "static_class_field"`
+
+default: `[]`
+
+Identifiers that are all-caps and contain only one word are inherently ambiguous, e.g. `HTML, JSON, PI, TAU, EPSILON`. Any of these could be names of classes that are in loose camel case, or names of constants that are in all-caps snake case. There's no way to make that determination without knowing the semantic meaning of them.
+Adding additional words demontstrates how the single-word versions are ambiguous: `HTMLTags, JSONSerializer, TAU_IS_2_PI, EPSILON_UNCERTAINTY`.
+
+As opposed to `ignoreSingleWords`, which is very broad, this option lets you allow all-caps single words in certain contexts that are likely to have constant members. For example, you can allowlist 1st-class constants (`export const MAX = 10`) or static class fields (`class Util { public static MAX = 10; }`), but not identifiers that are not usually used as constants (`class API {}` or `type HTML = {...}`).
+
+#### Example allowed single-word identifiers with each option:
+
+`enum_member`:
+```
+enum Direction {
+    NORTH, EAST, SOUTH, WEST
+}
+```
+
+`first_class_constant`:
+```
+export const VERSION = "1.0"
+```
+
+`object_field`:
+```
+const myEs6EnumDirection = {
+    NORTH: "north",
+    EAST: "east",
+    SOUTH: "south",
+    WEST: "west"
+}
+```
+
+`static_class_field`:
+```
+class MyUtil {
+    public static VERSION = "1.0";
+}
+```
+
+## ignoreSingleWords (deprecated)
 ---
 
 type: `boolean`
 
 default: `false`
+
+#### This option will be removed in a future release. Please use `ignoredIdentifiers` and/or `ignoreSingleWordsIn` instead
 
 Identifiers that are all-caps and contain only one word are inherently ambiguous, e.g. `HTML, JSON, PI, TAU, EPSILON`. Any of these could be names of classes that are in loose camel case, or names of constants that are in all-caps snake case. There's no way to make that determination without knowing the semantic meaning of them.
 Adding additional words demontstrates how the single-word versions are ambiguous: `HTMLTags, JSONSerializer, TAU_IS_2_PI, EPSILON_UNCERTAINTY`.
@@ -194,4 +241,4 @@ Adding additional words demontstrates how the single-word versions are ambiguous
 
 `false`: all-caps single-word identifiers trigger errors (assumed to be loose camel case)
 
-If you'd like to enforce `strict-camel-case` on single-word identifiers, but not trigger errors for single-word all-caps constants, consider keeping this option set to `false` and either adding your constant names to the `ignoredIdentifiers` option, or using `/* eslint-disable sequence/strict-camel-case */` around your constants.
+If you'd like to enforce `strict-camel-case` on single-word identifiers, but not trigger errors for single-word all-caps constants, ~~consider keeping this option set to `false` and either adding your constant names to the `ignoredIdentifiers` option, or using `/* eslint-disable sequence/strict-camel-case */` around your constants.~~ use `ignoreSingleWordsIn` to specify how you are using constants or put your identifiers in `ignoredIdentifiers`.
