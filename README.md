@@ -50,7 +50,8 @@ Configure with EsLint, e.g. in `.eslintrc.json`
             "ignoreImports": false,
             "ignoredIdentifiers": ["legacyAPI", "htmlToXML", "PI", "TAU", "EPSILON"],
             "allowOneCharWords": "last",
-            "ignoreSingleWords": false
+            "ignoreSingleWords": false,
+            "ignoreSingleWordsIn": ["enum_member", "static_class_field"]
         }
     ],
     "sequence/logical-expression-complexity": [
