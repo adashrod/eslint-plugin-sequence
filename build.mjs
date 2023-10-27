@@ -30,7 +30,7 @@ function copyDir(dirName) {
     });
 }
 
-fs.rmdirSync(distDir, { recursive: true, force: true });
+fs.rmSync(distDir, { recursive: true, force: true });
 fs.mkdirSync(distDir);
 
 copyFile("package.json");
