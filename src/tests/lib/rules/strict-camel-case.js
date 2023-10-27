@@ -100,6 +100,9 @@ es13RuleTester.run("strict-camel-case", rule, {
         `import { exec as doExec } from "child_process";`,
         `import { notMyFAULT } from "badNames";`,
         `import { notMyFAULT as betterName } from "badNames";`,
+        `import MyClass from "MyClass";
+        console.log(MyClass.VERSION);
+        `,
         {
             code: `export const MAX = 10;`,
             options: [{ ignoreSingleWordsIn: [ "first_class_constant" ] }]
@@ -346,8 +349,7 @@ tsRuleTester.run("strict-camel-case", rule, {
         errors: [{
             messageId: "notCamelCaseWithSuggestion"
         }]
-    },
-    {
+    }, {
         code: `enum Direction { NORTH, EAST, SOUTH, WEST }`,
         errors: [{
             message: 'Identifier "NORTH" is not in strict camel case, should be "North".',
@@ -358,8 +360,7 @@ tsRuleTester.run("strict-camel-case", rule, {
         }, {
             message: 'Identifier "WEST" is not in strict camel case, should be "West".',
         }]
-    },
-{
+    }, {
         code: `class Util { public static NAME = "TheUtil"; }`,
         errors: [{
             messageId: "notCamelCaseWithSuggestion"
