@@ -263,12 +263,24 @@ es13RuleTester.run("strict-camel-case", rule, {
             messageId: "notCamelCaseWithSuggestion"
         }]
     }, {
-        code: `export let MAX = 10;`,
+        code: `export let NOTCONST = 10;`,
         errors: [{
             messageId: "notCamelCaseWithSuggestion"
         }]
     }, {
-        code: `export var MAX = 10;`,
+        code: `export var NOTCONST = 10;`,
+        errors: [{
+            messageId: "notCamelCaseWithSuggestion"
+        }]
+    }, {
+        code: `export let NOTCONST = 10;`,
+        options: [{ ignoreSingleWordsIn: [ "first_class_constant" ] }],
+        errors: [{
+            messageId: "notCamelCaseWithSuggestion"
+        }]
+    }, {
+        code: `export var NOTCONST = 10;`,
+        options: [{ ignoreSingleWordsIn: [ "first_class_constant" ] }],
         errors: [{
             messageId: "notCamelCaseWithSuggestion"
         }]

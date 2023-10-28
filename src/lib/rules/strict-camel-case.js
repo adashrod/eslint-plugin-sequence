@@ -292,11 +292,15 @@ module.exports = {
          * check("XMLToHTML") -> { valid: false, suggestion: "XmlToHtml" }
          * check("XmlToHtml") -> { valid: true, suggestion: null }
          *
-         * Note: the value of the configs `ignoreSingleWords` and `allowOneCharWords` affect the results.
+         * Note: the value of the configs `ignoreSingleWords`, `ignoreSingleWordsIn`, and `allowOneCharWords` affect
+         * the results.
          * with `ignoreSingleWords=true`
          * check("HTML") -> { valid: true, suggestion: null }
          * with `ignoreSingleWords=false`
          * check("HTML") -> { valid: false, suggestion: "Html" }
+         * with `ignoreSingleWordsIn=["first_class_constant"]` and code `const VERSION = "1.0"`,
+         *     ignoreAllCapsIfSingleWord is true
+         * check("VERSION", true) -> { valid: true, suggestion: null }
          *
          * with `allowOneCharWords="never"`
          * check("AClass") -> { valid: false, suggestion: null } // suggestion not possible
@@ -309,16 +313,17 @@ module.exports = {
          * check("getX") -> { valid: true, suggestion: null }
          *
          * @param {string} s an identifier string
+         * @param {boolean} ignoreAllCapsIfSingleWord if true, interpret s as a constant
          * @returns an object with 2 keys: valid and suggestion
          */
-        function checkValidityAndGetSuggestion(s) {
+        function checkValidityAndGetSuggestion(s, ignoreAllCapsIfSingleWord) {
             let valid = false;
             let tokens = [];
             if (ignoredIdentifiers.includes(s)) {
                 valid = true;
-            } else if (isAllCaps(s) && ignoreSingleWords) {
+            } else if (isAllCaps(s) && (ignoreSingleWords || ignoreAllCapsIfSingleWord)) {
                 // ignoreSingleWords=true means treat "HTML" as a constant, not invalid camel case
-                log("TRACE", `skipping ambiguous "${s}" due to ignoreSingleWords=true`);
+                log("TRACE", `skipping ambiguous "${s}" due to ignoreSingleWords=true or ignorSingleWordsIn config`);
                 valid = true;
             } else if (isAllCapsSnakeCase(s)) {
                 // constants like THIS_IS_A_CONSTANT
@@ -364,7 +369,7 @@ module.exports = {
             }
             const joined = tokens.join("");
             return {
-                suggestion: joined !== s ? joined : null,
+                suggestion: ![s, ""].includes(joined)  ? joined : null,
                 valid
             }
         }
@@ -450,14 +455,11 @@ module.exports = {
             }
         }
 
-        function checkDeclarations(node, exemptionType) {
+        function checkDeclarations(node, singleWordExemptionType) {
             for (const variable of context.getDeclaredVariables(node)) { // funcName+params, mult var decl in one stmt
-                if (ignoreSingleWordsIn.includes(exemptionType) && node.kind === "const" && isAllCaps(variable.name)) {
-                    log("TRACE", `variable declarations skipping node.name=${node.name} due to config`);
-                    continue;
-                }
                 log("DEBUG", `*Declaration checking variable.name=${variable.name}`);
-                const response = checkValidityAndGetSuggestion(variable.name);
+                const response = checkValidityAndGetSuggestion(variable.name,
+                    ignoreSingleWordsIn.includes(singleWordExemptionType));
                 if (response.valid) {
                     log("TRACE", `*Declaration: PASS variable.name=${variable.name}`);
                     continue;
@@ -480,10 +482,11 @@ module.exports = {
             }
         }
 
-        function checkClassFieldsMethodsAndObjectFieldsMethods(node, exemptionType) {
-            if (!ignoreProperties && !(ignoreSingleWordsIn.includes(exemptionType) && isAllCaps(node.name))) {
+        function checkClassFieldsMethodsAndObjectFieldsMethods(node, singleWordExemptionType) {
+            if (!ignoreProperties) {
                 log("DEBUG", `class/object field/method declarations checking ${node.name}`);
-                const response = checkValidityAndGetSuggestion(node.name);
+                const response = checkValidityAndGetSuggestion(node.name,
+                    ignoreSingleWordsIn.includes(singleWordExemptionType));
                 if (!response.valid) {
                     log("TRACE", () => [`Field/method declarations reporting ${node.name}`, objectToString(node)]);
                     report(node, response.suggestion, "Field/method declarations");
@@ -497,11 +500,7 @@ module.exports = {
 
         function checkClassFields(node) {
             const propDef = node.parent;
-            if (ignoreSingleWordsIn.includes("static_class_field") && propDef.static && isAllCaps(node.name)) {
-                log("TRACE", `static field declarations skipping node.name=${node.name} due to config`);
-                return;
-            }
-            checkClassFieldsMethodsAndObjectFieldsMethods(node);
+            checkClassFieldsMethodsAndObjectFieldsMethods(node, propDef.static ? "static_class_field" : null);
         }
 
         function checkImportDeclarations(node) {
@@ -562,10 +561,11 @@ module.exports = {
             TSEnumDeclaration: checkDeclarations,
             FunctionDeclaration: checkDeclarations,
             FunctionExpression: checkDeclarations,
-            VariableDeclaration: node => checkDeclarations(node, "first_class_constant"),
+            VariableDeclaration: node => checkDeclarations(node, node.kind === "const" ? "first_class_constant" : null),
 
             // ---object literals---
-            "ObjectExpression > Property > Identifier.key": node => checkClassFieldsMethodsAndObjectFieldsMethods(node, "object_field"),
+            "ObjectExpression > Property > Identifier.key": node =>
+                checkClassFieldsMethodsAndObjectFieldsMethods(node, "object_field"),
             // ---instance functions on classes---
             "MethodDefinition > Identifier.key": checkClassFieldsMethodsAndObjectFieldsMethods,
             // ---TS-only: class instance and static props---
@@ -575,7 +575,8 @@ module.exports = {
             // class { #privPropName = ...; }
             "PropertyDefinition > PrivateIdentifier.key": checkClassFieldsMethodsAndObjectFieldsMethods,
             // ---class props `this.xyz = ...`, `window.abc = ...`---
-            "AssignmentExpression > MemberExpression > Identifier.property": checkClassFieldsMethodsAndObjectFieldsMethods,
+            "AssignmentExpression > MemberExpression > Identifier.property":
+                checkClassFieldsMethodsAndObjectFieldsMethods,
             // TS interface fields
             "TSInterfaceDeclaration > TSInterfaceBody > TSPropertySignature > Identifier.key":
                 checkClassFieldsMethodsAndObjectFieldsMethods,
@@ -585,7 +586,8 @@ module.exports = {
             "TSTypeAliasDeclaration > TSTypeLiteral > TSPropertySignature > Identifier.key":
                 checkClassFieldsMethodsAndObjectFieldsMethods,
             // TS enum members
-            "TSEnumDeclaration > TSEnumMember > Identifier.id": node => checkClassFieldsMethodsAndObjectFieldsMethods(node, "enum_member"),
+            "TSEnumDeclaration > TSEnumMember > Identifier.id":
+                node => checkClassFieldsMethodsAndObjectFieldsMethods(node, "enum_member"),
 
             ImportDeclaration: checkImportDeclarations,
 
