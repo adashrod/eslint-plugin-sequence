@@ -82,35 +82,6 @@ Further reading:
 
 # Configuration
 
-## ignoreProperties
-
-type: `boolean`
-
-default: `false`
-
-Set to `true` to ignore: class fields, class methods, object keys, object methods, and private fields and methods.
-
-Example items that are ignored:
-```javascript
-let obj = {
-    ignoredKey: 10,
-    ignoredFunction() {}
-};
-
-class MyJsClass {
-    constructor() {
-        this.ignoredProperty = "";
-    }
-    ignoredFunction() {}
-    #ignoredPrivateField = 5;
-    #ignoredPrivateFunction() {}
-}
-
-class MyTsClass {
-    public ignoredField: string = "";
-}
-```
-
 ## ignoreImports
 ---
 
@@ -222,6 +193,37 @@ const myEs6EnumDirection = {
 ```
 class MyUtil {
     public static VERSION = "1.0";
+}
+```
+
+## ignoreProperties (deprecated)
+
+type: `boolean`
+
+default: `false`
+
+#### This option will be removed in a future release. Please use `ignoredIdentifiers` and/or `ignoreSingleWordsIn` instead
+
+Set to `true` to ignore: class fields, class methods, object keys, object methods, and private fields and methods.
+
+Example items that are ignored:
+```javascript
+let obj = {
+    ignoredKey: 10,
+    ignoredFunction() {}
+};
+
+class MyJsClass {
+    constructor() {
+        this.ignoredProperty = "";
+    }
+    ignoredFunction() {}
+    #ignoredPrivateField = 5;
+    #ignoredPrivateFunction() {}
+}
+
+class MyTsClass {
+    public ignoredField: string = "";
 }
 ```
 
