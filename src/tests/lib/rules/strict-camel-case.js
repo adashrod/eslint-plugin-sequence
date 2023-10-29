@@ -109,9 +109,19 @@ es13RuleTester.run("strict-camel-case", rule, {
         }, {
             code: `const esEnumDirection = { NORTH: 0, EAST: 1, SOUTH: 2, WEST: 3 }`,
             options: [{ ignoreSingleWordsIn: [ "object_field" ] }]
+        }, {
+            code: `const obj = {}; obj.VERSION = "1.0";`,
+            options: [{ ignoreSingleWordsIn: [ "object_field" ] }]
+
         }
     ],
     invalid: [{
+        code:  `const obj = {}; obj.VERSION = "1.0";`,
+        errors: [{
+            messageId: "notCamelCaseWithSuggestion"
+        }]
+
+    }, {
         code: `let xmlToHTML = () => {};`,
         errors: [{
             messageId: "notCamelCaseWithSuggestion"

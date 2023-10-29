@@ -37,7 +37,7 @@ class JSONAPISerializer {
 
 ## Rant
 
-The opinion of this rule is that acronyms, abbreviations, initialisms, etc. that are all-caps in sentence case should absolutely *never* be all-caps in camel case. Camel case is a form of destructive editing; it does not acknowledge, respect, or preserve the original case of the input, whether that input is a capitalized proper noun (e.g. "Billie"), a lowercase common noun (e.g. "chair"), any other type of word (e.g. "listen"), or even an acronym/abbreviation/etc.
+The opinion of this rule is that acronyms, abbreviations, initialisms, etc. that are all-caps in sentence case should absolutely *never* be all-caps in camel case. Camel case is a form of destructive editing; it does not acknowledge, respect, or preserve the original case of the input, whether that input is a capitalized proper noun (e.g. "Billie", `let billie;`), a lowercase common noun (e.g. "chair", `class Chair {}`), any other type of word (e.g. "listen"), or even an acronym/abbreviation/etc.
 
 Further reading:
 [Google Java style guide](https://google.github.io/styleguide/javaguide.html#s5.3-camel-case),
@@ -181,12 +181,14 @@ export const VERSION = "1.0"
 
 `object_field`:
 ```
-const myEs6EnumDirection = {
+const MyEs6EnumDirection = {
     NORTH: "north",
     EAST: "east",
     SOUTH: "south",
     WEST: "west"
 }
+
+MyEs6EnumDirection.VERSION = "1.0";
 ```
 
 `static_class_field`:
