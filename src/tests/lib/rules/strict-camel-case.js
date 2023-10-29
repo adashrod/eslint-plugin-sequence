@@ -17,27 +17,37 @@ es5RuleTester.run("strict-camel-case", rule, {
     invalid: [{
         code: `var aVAR = 5, aVar2 = 1;`,
         errors: [{
-            messageId: "notCamelCaseWithSuggestion"
+            suggestions: [{
+                output: `var aVar = 5, aVar2 = 1;`
+            }]
         }]
     }, {
         code: `var xmlToHTML = function() {};`,
         errors: [{
-            messageId: "notCamelCaseWithSuggestion"
+            suggestions: [{
+                output: `var xmlToHtml = function() {};`
+            }]
         }]
     }, {
         code: `function xmlToHTML() {};`,
         errors: [{
-            messageId: "notCamelCaseWithSuggestion"
+            suggestions: [{
+                output: `function xmlToHtml() {};`
+            }]
         }]
     }, {
         code: `this.aGLOBALVar = 5;`,
         errors: [{
-            messageId: "notCamelCaseWithSuggestion"
+            suggestions: [{
+                output: `this.aGlobalVar = 5;`
+            }]
         }]
     }, {
         code: `aGLOBALVar = 5;`,
         errors: [{
-            messageId: "notCamelCaseWithSuggestion"
+            suggestions: [{
+                output: `aGlobalVar = 5;`
+            }]
         }]
     }]
 });
@@ -125,102 +135,137 @@ es13RuleTester.run("strict-camel-case", rule, {
     invalid: [{
         code:  `const obj = {}; obj.VERSION = "1.0";`,
         errors: [{
-            messageId: "notCamelCaseWithSuggestion"
+            suggestions: [{
+                output: `const obj = {}; obj.Version = "1.0";`
+            }]
         }]
-
     }, {
         code: `let xmlToHTML = () => {};`,
         errors: [{
-            messageId: "notCamelCaseWithSuggestion"
+            suggestions: [{
+                output: `let xmlToHtml = () => {};`,
+            }]
         }]
     }, {
         code: `const AFunction = () => {};`,
         errors: [{
-            messageId: "notCamelCaseNoSuggestion"
+            message: `Identifier "AFunction" is not in strict camel case, no suggestion possible for 1-char words.`
         }]
     }, {
         code: `const AFunction = () => {};`,
         options: [{ allowOneCharWords: "last" }],
         errors: [{
-            messageId: "notCamelCaseNoSuggestion"
+            message: `Identifier "AFunction" is not in strict camel case, no suggestion possible for 1-char words.`
         }]
     }, {
         code: `class API {}`,
         options: [{ ignoreSingleWords: false }],
         errors: [{
-            messageId: "notCamelCaseWithSuggestion"
+            suggestions: [{
+                output: `class Api {}`
+            }]
         }]
     }, {
         code: `const apiApiAPI = () => {};`,
         errors: [{
-            messageId: "notCamelCaseWithSuggestion"
+            suggestions: [{
+                output: `const apiApiApi = () => {};`
+            }]
         }]
     }, {
         code: `const someFunc = (firstParam, secondPARAM) => {};`,
         errors: [{
-            messageId: "notCamelCaseWithSuggestion"
+            suggestions: [{
+                output: `const someFunc = (firstParam, secondParam) => {};`
+            }]
         }]
     }, {
         code: `const func = function(firstPARAM, secondParam) {};`,
         errors: [{
-            messageId: "notCamelCaseWithSuggestion"
+            suggestions: [{
+                output: `const func = function(firstParam, secondParam) {};`
+            }]
         }]
     }, {
         code: `const func = function myFUNC(firstParam, secondParam) {};`,
         errors: [{
-            messageId: "notCamelCaseWithSuggestion"
+            suggestions: [{
+                output: `const func = function myFunc(firstParam, secondParam) {};`
+            }]
         }]
     }, {
         code: `class MyAPIClass {}`,
         errors: [{
-            messageId: "notCamelCaseWithSuggestion"
+            suggestions: [{
+                output: `class MyApiClass {}`
+            }]
         }]
     }, {
         code: `const MyAPIClass = class {}`,
         errors: [{
-            messageId: "notCamelCaseWithSuggestion"
+            suggestions: [{
+                output: `const MyApiClass = class {}`
+            }]
         }]
     }, {
         code: `try { throw new Error(); } catch (anIOException) {}`,
         errors: [{
-            messageId: "notCamelCaseWithSuggestion"
+            suggestions: [{
+                output: `try { throw new Error(); } catch (anIoException) {}`
+            }]
         }]
     }, {
         code: `let obj = { htmlAPI: "..." };`,
         errors: [{
-            messageId: "notCamelCaseWithSuggestion"
+            suggestions: [{
+                output: `let obj = { htmlApi: "..." };`
+            }]
         }]
     }, {
         code: `class MyClass { convertToXML(html) {} }`,
         errors: [{
-            messageId: "notCamelCaseWithSuggestion"
+            suggestions: [{
+                output: `class MyClass { convertToXml(html) {} }`
+            }]
         }]
     }, {
         code: `class MyClass { convertToXml(theHTML) {} }`,
         errors: [{
-            messageId: "notCamelCaseWithSuggestion"
+            suggestions: [{
+                output: `class MyClass { convertToXml(theHtml) {} }`
+            }]
         }]
     }, {
         code: `class MyClass { convertToXML(theHTML) {} }`,
         errors: [{
-            messageId: "notCamelCaseWithSuggestion"
+            suggestions: [{
+                output: `class MyClass { convertToXml(theHTML) {} }`
+            }]
         }, {
-            messageId: "notCamelCaseWithSuggestion"
+            suggestions: [{
+                output: `class MyClass { convertToXML(theHtml) {} }`
+            }]
         }]
     }, {
         code: `class MyClass { constructor() { this.myAPI = null; } }`,
         errors: [{
-            messageId: "notCamelCaseWithSuggestion"
+            suggestions: [{
+                output: `class MyClass { constructor() { this.myApi = null; } }`
+            }]
         }]
     }, {
         code: `class TheClass { #somePrivateTXT = 5; }`,
         errors: [{
-            messageId: "notCamelCasePrivateWithSuggestion"
+            suggestions: [{
+                output: `class TheClass { #somePrivateTxt = 5; }`
+            }]
         }]
     }, {
         code: `class SomeClass { #privateAPICall() {} }`,
         errors: [{
-            messageId: "notCamelCasePrivateWithSuggestion"
+            suggestions: [{
+                output: `class SomeClass { #privateApiCall() {} }`
+            }]
         }]
     }, {
         code: `myXYZLabel1:
@@ -231,11 +276,35 @@ es13RuleTester.run("strict-camel-case", rule, {
             }
         }`,
         errors: [{
-            messageId: "notCamelCaseWithSuggestion"
+            suggestions: [{
+                output: `myXyzLabel1:
+        my_label_2:
+        for (let i = 0; i < 5; i++) {
+            if (i == 3) {
+                break my_label_2;
+            }
+        }`
+            }]
         }, {
-            messageId: "notCamelCaseWithSuggestion"
+            suggestions: [{
+                output: `myXYZLabel1:
+        myLabel2:
+        for (let i = 0; i < 5; i++) {
+            if (i == 3) {
+                break my_label_2;
+            }
+        }`
+            }]
         }, {
-            messageId: "notCamelCaseWithSuggestion"
+            suggestions: [{
+                output: `myXYZLabel1:
+        my_label_2:
+        for (let i = 0; i < 5; i++) {
+            if (i == 3) {
+                break myLabel2;
+            }
+        }`
+            }]
         }]
     }, {
         code: `label_2:
@@ -245,72 +314,114 @@ es13RuleTester.run("strict-camel-case", rule, {
             }
         }`,
         errors: [{
-            messageId: "notCamelCaseWithSuggestion"
+            suggestions:[{
+                output: `label2:
+        for (let i = 0; i < 5; i++) {
+            if (i == 3) {
+                continue label_2;
+            }
+        }`
+            }]
         }, {
-            messageId: "notCamelCaseWithSuggestion"
+            suggestions: [{
+                output: `label_2:
+        for (let i = 0; i < 5; i++) {
+            if (i == 3) {
+                continue label2;
+            }
+        }`
+            }]
         }]
     }, {
         code: `export function toXML() {}`,
         errors: [{
-            messageId: "notCamelCaseWithSuggestion"
+            suggestions: [{
+                output: `export function toXml() {}`
+            }]
         }]
     }, {
         code: `export { default as some_stuff } from "/utils"`,
         errors: [{
-            messageId: "notCamelCaseWithSuggestion"
+            suggestions: [{
+                output: `export { default as someStuff } from "/utils"`
+            }]
         }]
     }, {
         code: `import * as FS from "fs"`,
         errors: [{
-            messageId: "notCamelCaseWithSuggestion"
+            suggestions: [{
+                output: `import * as Fs from "fs"`
+            }]
         }]
     }, {
         code: `import UNDERSCORE from "underscore"`,
         errors: [{
-            messageId: "notCamelCaseWithSuggestion"
+            suggestions: [{
+                output: `import Underscore from "underscore"`
+            }]
         }]
     }, {
         code: `import { exec as doEXEC } from "child_process"`,
         errors: [{
-            messageId: "notCamelCaseWithSuggestion"
+            suggestions: [{
+                output: `import { exec as doExec } from "child_process"`
+            }]
         }]
     }, {
         code: `export const MAX = 10;`,
         errors: [{
-            messageId: "notCamelCaseWithSuggestion"
+            suggestions: [{
+                output: `export const Max = 10;`
+            }]
         }]
     }, {
         code: `export let NOTCONST = 10;`,
         errors: [{
-            messageId: "notCamelCaseWithSuggestion"
+            suggestions: [{
+                output: `export let Notconst = 10;`
+            }]
         }]
     }, {
         code: `export var NOTCONST = 10;`,
         errors: [{
-            messageId: "notCamelCaseWithSuggestion"
+            suggestions: [{
+                output: `export var Notconst = 10;`
+            }]
         }]
     }, {
         code: `export let NOTCONST = 10;`,
         options: [{ ignoreSingleWordsIn: [ "first_class_constant" ] }],
         errors: [{
-            messageId: "notCamelCaseWithSuggestion"
+            suggestions: [{
+                output: `export let Notconst = 10;`
+            }]
         }]
     }, {
         code: `export var NOTCONST = 10;`,
         options: [{ ignoreSingleWordsIn: [ "first_class_constant" ] }],
         errors: [{
-            messageId: "notCamelCaseWithSuggestion"
+            suggestions: [{
+                output: `export var Notconst = 10;`
+            }]
         }]
     }, {
         code: `const esEnumDirection = { NORTH: 0, EAST: 1, SOUTH: 2, WEST: 3 }`,
         errors: [{
-            message: 'Identifier "NORTH" is not in strict camel case, should be "North".',
+            suggestions: [{
+                output: `const esEnumDirection = { North: 0, EAST: 1, SOUTH: 2, WEST: 3 }`
+            }]
         }, {
-            message: 'Identifier "EAST" is not in strict camel case, should be "East".',
+            suggestions: [{
+                output: `const esEnumDirection = { NORTH: 0, East: 1, SOUTH: 2, WEST: 3 }`
+            }]
         }, {
-            message: 'Identifier "SOUTH" is not in strict camel case, should be "South".',
+            suggestions: [{
+                output: `const esEnumDirection = { NORTH: 0, EAST: 1, South: 2, WEST: 3 }`
+            }]
         }, {
-            message: 'Identifier "WEST" is not in strict camel case, should be "West".',
+            suggestions: [{
+                output: `const esEnumDirection = { NORTH: 0, EAST: 1, SOUTH: 2, West: 3 }`
+            }]
         }]
     }]
 });
@@ -340,59 +451,85 @@ tsRuleTester.run("strict-camel-case", rule, {
     invalid: [{
         code: `class MyClass { private innerHTML: string; }`,
         errors: [{
-            messageId: "notCamelCaseWithSuggestion"
+            suggestions: [{
+                output: `class MyClass { private innerHtml: string; }`
+            }]
         }]
     }, {
         code: `interface MyXMLInterface { xml: string; }`,
         errors: [{
-            messageId: "notCamelCaseWithSuggestion"
+            suggestions: [{
+                output: `interface MyXmlInterface { xml: string; }`
+            }]
         }]
     }, {
         code: `interface MyInterface { innerHTML: string; }`,
         errors: [{
-            messageId: "notCamelCaseWithSuggestion"
+            suggestions: [{
+                output: `interface MyInterface { innerHtml: string; }`
+            }]
         }]
     }, {
         code: `interface MyInterface { parseHTML(html: string): any; }`,
         errors: [{
-            messageId: "notCamelCaseWithSuggestion"
+            suggestions: [{
+                output: `interface MyInterface { parseHtml(html: string): any; }`
+            }]
         }]
     }, {
         code: `type MyType = { someHTML: string }`,
         errors: [{
-            messageId: "notCamelCaseWithSuggestion"
+            suggestions: [{
+                output: `type MyType = { someHtml: string }`
+            }]
         }]
     }, {
         code: `type MyType = { aBoolean: boolean, someHTML: string }`,
         errors: [{
-            messageId: "notCamelCaseWithSuggestion"
+            suggestions: [{
+                output: `type MyType = { aBoolean: boolean, someHtml: string }`
+            }]
         }]
     }, {
         code: `enum HTMLTags { HEAD, BODY, DIV }`,
         options: [{ ignoredIdentifiers: ["HEAD", "BODY", "DIV"] }],
         errors: [{
-            messageId: "notCamelCaseWithSuggestion"
+            suggestions: [{
+                output: `enum HtmlTags { HEAD, BODY, DIV }`
+            }]
         }]
     }, {
         code: `enum Error { JSError }`,
         errors: [{
-            messageId: "notCamelCaseWithSuggestion"
+            suggestions: [{
+                output: `enum Error { JsError }`
+            }]
         }]
     }, {
         code: `enum Direction { NORTH, EAST, SOUTH, WEST }`,
         errors: [{
-            message: 'Identifier "NORTH" is not in strict camel case, should be "North".',
+            suggestions: [{
+                output: `enum Direction { North, EAST, SOUTH, WEST }`
+            }]
         }, {
-            message: 'Identifier "EAST" is not in strict camel case, should be "East".',
+            suggestions: [{
+                output: `enum Direction { NORTH, East, SOUTH, WEST }`
+            }]
         }, {
-            message: 'Identifier "SOUTH" is not in strict camel case, should be "South".',
+            suggestions: [{
+                output: `enum Direction { NORTH, EAST, South, WEST }`
+            }]
         }, {
-            message: 'Identifier "WEST" is not in strict camel case, should be "West".',
+            suggestions: [{
+                output: `enum Direction { NORTH, EAST, SOUTH, West }`
+            }]
         }]
     }, {
         code: `class Util { public static NAME = "TheUtil"; }`,
         errors: [{
-            messageId: "notCamelCaseWithSuggestion"
+            suggestions: [{
+                output: `class Util { public static Name = "TheUtil"; }`
+            }]
         }]
     }]
 });

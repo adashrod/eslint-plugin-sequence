@@ -413,8 +413,10 @@ module.exports = {
             reported.add(node.range[0]);
 
             let messageId;
+            let optionalPrivatePrefix = "";
             if (node.type === "PrivateIdentifier") {
                 messageId = suggestion ? "notCamelCasePrivateWithSuggestion" : "notCamelCasePrivateNoSuggestion";
+                optionalPrivatePrefix = "#";
             } else {
                 messageId = suggestion ? "notCamelCaseWithSuggestion" : "notCamelCaseNoSuggestion";
             }
@@ -431,7 +433,7 @@ module.exports = {
                 suggest: suggestion ? [{
                     desc: `Replace "${node.name}" with "${suggestion}"`,
                     fix(fixer) {
-                        return fixer.replaceTextRange(node.range, suggestion);
+                        return fixer.replaceTextRange(node.range, optionalPrivatePrefix + suggestion);
                     }
                 }] : null
             });
