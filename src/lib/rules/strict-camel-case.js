@@ -162,6 +162,14 @@ module.exports = {
         }
 
         /**
+         * @param {string} s a string
+         * @return {boolean} true if s contains only uppercase letters and digits
+         */
+        function isAllCapsAndDigits(s) {
+            return s.split("").every(c => isUpper(c) || isDigit(c));
+        }
+
+        /**
          * @param {string} c any one-character string
          * @return {boolean} true if c is a lowercase letter
          */
@@ -321,7 +329,11 @@ module.exports = {
             let tokens = [];
             if (ignoredIdentifiers.includes(s)) {
                 valid = true;
-            } else if (isAllCaps(s) && (ignoreSingleWords || ignoreAllCapsIfSingleWord)) {
+            } else if (isAllCapsAndDigits(s) && (ignoreSingleWords || ignoreAllCapsIfSingleWord)) {
+                // using isAllCapsAndDigits and not isAllCaps to allow one-word names like "HTML5". This is a slight
+                // deviation from the tokenization behavior in that tokenize() still treats "HTML5" as two tokens, but
+                // fixing that tokenization to match this wouldn't affect the suggestions and the tokens aren't exposed
+                // to the user, so it's unimportant.
                 // ignoreSingleWords=true means treat "HTML" as a constant, not invalid camel case
                 log("TRACE", `skipping ambiguous "${s}" due to ignoreSingleWords=true or ignorSingleWordsIn config`);
                 valid = true;

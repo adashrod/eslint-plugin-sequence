@@ -112,7 +112,14 @@ es13RuleTester.run("strict-camel-case", rule, {
         }, {
             code: `const obj = {}; obj.VERSION = "1.0";`,
             options: [{ ignoreSingleWordsIn: [ "object_field" ] }]
-
+        }, {
+            code: `const obj = {
+                FIELD1: 123
+            };`,
+            options: [{ ignoreSingleWordsIn: [ "object_field" ] }]
+        }, {
+            code: `const obj = {}; obj.FIELD1 = "1.0";`,
+            options: [{ ignoreSingleWordsIn: [ "object_field" ] }]
         }
     ],
     invalid: [{
