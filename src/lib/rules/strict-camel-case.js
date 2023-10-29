@@ -44,15 +44,14 @@ module.exports = {
                 },
                 ignoreSingleWordsIn: {
                     type: "array",
-                    items: [{
-                        type: "string",
+                    items: {
                         enum: [
                             "enum_member",
                             "first_class_constant",
                             "object_field",
                             "static_class_field"
                         ]
-                    }],
+                    },
                     minItems: 0,
                     uniqueItems: true
                 }
@@ -84,13 +83,12 @@ module.exports = {
             ignoreSingleWords = options.ignoreSingleWords ?? false,
             ignoreSingleWordsIn = options.ignoreSingleWordsIn ?? [];
 
-        const LOG_RULE_PREFIX = "eslint-plugin-sequence/strict-camel-case ";
         const LEVELS = ["OFF", "FATAL", "ERROR", "WARN", "INFO", "DEBUG", "TRACE"];
         let currentLogLevel; // number
 
         function log(requestedLevel, ...args) {
             if (args.length > 0 && isLogLevelEnabled(requestedLevel)) {
-                const label = LOG_RULE_PREFIX + requestedLevel.padEnd(5);
+                const label = context.id + requestedLevel.padEnd(5);
                 if (typeof args[0] === "function") {
                     console.log(label, ...args[0]());
                 } else {
