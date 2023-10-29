@@ -588,6 +588,9 @@ module.exports = {
             "MethodDefinition > PrivateIdentifier.key": checkClassFieldsMethodsAndObjectFieldsMethods,
             // class { #privPropName = ...; }
             "PropertyDefinition > PrivateIdentifier.key": checkClassFieldsMethodsAndObjectFieldsMethods,
+            // ---private class props, defined at assignment `this.#xyz = ...`---
+            "AssignmentExpression > MemberExpression > PrivateIdentifier.property":
+                checkClassFieldsMethodsAndObjectFieldsMethods,
             // ---class props `this.xyz = ...`, `window.abc = ...`---
             "AssignmentExpression > MemberExpression > Identifier.property":
                 node => checkClassFieldsMethodsAndObjectFieldsMethods(node, "object_field"),

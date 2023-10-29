@@ -268,6 +268,13 @@ es13RuleTester.run("strict-camel-case", rule, {
             }]
         }]
     }, {
+        code: `class TheClass { constructor() { this.myAPI = {}; } }`,
+        errors: [{
+            suggestions: [{
+                output: `class TheClass { constructor() { this.myApi = {}; } }`
+            }]
+        }]
+    }, {
         code: `myXYZLabel1:
         my_label_2:
         for (let i = 0; i < 5; i++) {
