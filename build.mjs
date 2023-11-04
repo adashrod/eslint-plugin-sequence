@@ -30,11 +30,9 @@ function copyDir(dirName) {
     });
 }
 
-fs.rmSync(distDir, { recursive: true, force: true });
-fs.mkdirSync(distDir);
+fs.rmSync(`${distDir}/tests`, { recursive: true, force: true });
 
+copyDir(`${srcPrefix}docs`);
 copyFile("package.json");
 copyFile("README.md");
 copyFile("LICENSE");
-copyFile("src/index.js");
-copyDir("src/lib/rules");

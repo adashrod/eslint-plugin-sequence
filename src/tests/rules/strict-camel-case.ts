@@ -1,12 +1,13 @@
-const rule = require("../../../lib/rules/strict-camel-case");
-const { RuleTester } = require("eslint");
+import { RuleTester } from "eslint";
+
+import strictCamelCaseRule from "@adashrodEps/lib/rules/strict-camel-case";
 
 const es5RuleTester = new RuleTester({
     parserOptions: {
         ecmaVersion: 5,
     }
 });
-es5RuleTester.run("strict-camel-case", rule, {
+es5RuleTester.run("strict-camel-case", strictCamelCaseRule, {
     valid: [
         `var anXmlString = "";`,
         `var xmlToHtml = function() {};`,
@@ -59,7 +60,7 @@ const es13RuleTester = new RuleTester({
         sourceType: "module"
     }
 });
-es13RuleTester.run("strict-camel-case", rule, {
+es13RuleTester.run("strict-camel-case", strictCamelCaseRule, {
     valid: [
         `let xmlToHtml = () => {};`,
         `let русскийВоенныйКорабльИдиНаХуй = true;`,
@@ -436,7 +437,7 @@ es13RuleTester.run("strict-camel-case", rule, {
 const tsRuleTester = new RuleTester({
     parser: require.resolve('@typescript-eslint/parser')
 });
-tsRuleTester.run("strict-camel-case", rule, {
+tsRuleTester.run("strict-camel-case", strictCamelCaseRule, {
     valid: [
         `class MyClass { private innerHtml: string; }`,
         `interface MyInterface { aField: number; parseXml(): void; }`,

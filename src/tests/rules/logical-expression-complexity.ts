@@ -1,12 +1,13 @@
-const rule = require("../../../lib/rules/logical-expression-complexity");
-const { RuleTester } = require("eslint");
+import { RuleTester } from "eslint";
+
+import logicalExpressionComplexityRule from "@adashrodEps/lib/rules/logical-expression-complexity";
 
 const es5RuleTester = new RuleTester({
     parserOptions: {
         ecmaVersion: 13,
     }
 });
-es5RuleTester.run("logical-expression-complexity", rule, {
+es5RuleTester.run("logical-expression-complexity", logicalExpressionComplexityRule, {
     valid: [
         `let a, b, c; let res = a && b && c;`,
         `let a, b; let res = a ?? b;`,

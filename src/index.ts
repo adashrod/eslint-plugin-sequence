@@ -1,13 +1,20 @@
-const orderedImportsByPath = require("./lib/rules/ordered-imports-by-path.js");
-const orderedImportMembers = require("./lib/rules/ordered-import-members.js");
-const strictCamelCase = require("./lib/rules/strict-camel-case.js");
-const logicalExpressionComplexity = require("./lib/rules/logical-expression-complexity.js");
+import { addAlias } from "module-alias";
+/*
+not using _moduleAliases in package.json because:
+- we need different aliases for unit tests and runtime
+- the value in package.json for this package doens't get picked up by apps importing this package
+__dirname == <root>/src
+ */
+addAlias("@adashrodEps", __dirname);
 
-module.exports = {
-    rules: {
-        "ordered-imports-by-path": orderedImportsByPath,
-        "ordered-import-members": orderedImportMembers,
-        "strict-camel-case": strictCamelCase,
-        "logical-expression-complexity": logicalExpressionComplexity
-    },
+import logicalExpressionComplexity from "@adashrodEps/lib/rules/logical-expression-complexity";
+import orderedImportMembers from "@adashrodEps/lib/rules/ordered-import-members";
+import orderedImportsByPath from "@adashrodEps/lib/rules/ordered-imports-by-path";
+import strictCamelCase from "@adashrodEps/lib/rules/strict-camel-case";
+
+export const rules = {
+    "logical-expression-complexity": logicalExpressionComplexity,
+    "ordered-import-members": orderedImportMembers,
+    "ordered-imports-by-path": orderedImportsByPath,
+    "strict-camel-case": strictCamelCase
 };
