@@ -17,7 +17,7 @@
         "typescript": "^4.5.4"
     },
     "scripts": {
-        "test": "node --loader ts-node/esm.mjs src/tests/test-all.ts",
+        "test": "ts-node src/tests/test-all.ts",
         "build": "rm -rf dist; tsc; node build.mjs"
     },
     "type": "commonjs",
