@@ -531,9 +531,9 @@ function create(context: Rule.RuleContext): Rule.RuleListener {
 
     function checkDeclarations(node: Rule.Node, singleWordExemptionType?: IgnoreSingleWordsIn): void {
         // compatibility with EsLint 7.x, 8.x and upcoming 9
-        for (const variable of typeof sourceCode.getDeclaredVariables === "function" ?
+        for (const variable of (typeof sourceCode.getDeclaredVariables === "function" ?
                 sourceCode.getDeclaredVariables(node) :
-                context.getDeclaredVariables(node)) { // funcName+params, mult var decl in one stmt
+                context.getDeclaredVariables(node))) { // funcName+params, mult var decl in one stmt
             log(LogLevel.DEBUG, `*Declaration checking variable.name=${variable.name}`);
             const response = checkValidityAndGetSuggestion(variable.name,
                 ignoreSingleWordsIn.includes(singleWordExemptionType as IgnoreSingleWordsIn));
