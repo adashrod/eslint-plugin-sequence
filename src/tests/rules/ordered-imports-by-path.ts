@@ -1,5 +1,6 @@
-const rule = require("../../../lib/rules/ordered-imports-by-path");
-const { RuleTester } = require("eslint");
+import { RuleTester } from "eslint";
+
+import orderedImportsByPathRule from "@adashrodEps/lib/rules/ordered-imports-by-path";
 
 const esRuleTester = new RuleTester({
     parserOptions: {
@@ -8,7 +9,7 @@ const esRuleTester = new RuleTester({
     }
 });
 
-esRuleTester.run("ordered-imports-by-path", rule, {
+esRuleTester.run("ordered-imports-by-path", orderedImportsByPathRule, {
     valid: [
         `import Alpha from "Alpha";\n` +
             `import Bravo from "Bravo";`,
@@ -166,7 +167,7 @@ esRuleTester.run("ordered-imports-by-path", rule, {
 const tsRuleTester = new RuleTester({
     parser: require.resolve('@typescript-eslint/parser')
 });
-tsRuleTester.run("ordered-imports-by-path", rule, {
+tsRuleTester.run("ordered-imports-by-path", orderedImportsByPathRule, {
     valid: [{
         code: `import { ArrayList } from "Collections";\n` +
             `import type { List } from "Collections";\n`,

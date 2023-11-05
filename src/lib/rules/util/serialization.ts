@@ -1,6 +1,8 @@
 const tab = "    ";
 
-function helper(obj, indent, cache, path) {
+type CacheTuple = [any, string];
+
+function helper(obj: any, indent: string, cache: CacheTuple[], path: string): string {
     const found = cache.find(cacheItem => cacheItem[0] === obj);
     if (found) {
         return `<circular> (${found[1]})`;
@@ -58,33 +60,31 @@ function helper(obj, indent, cache, path) {
     return "unknown";
 }
 
-module.exports = {
-    /**
-     * Serializes an object to a pretty-printed JSON-like string. This finds circular references and replaces them in
-     * the output with paths to the target objects.
-     *
-     * E.g.
-     * let obj = {
-     *     aProp: 5,
-     *     meta: {
-     *         name: "my object"
-     *     }
-     * };
-     * obj.name = obj.meta.name;
-     *
-     * objectToString(obj) -->
-     * {
-     *     "aProp": 5,
-     *     "meta": {
-     *         "name": "my object"
-     *     },
-     *     "name": <circular> (<root>.meta.name)
-     * }
-     *
-     * @param {any} object an object to serialize as a JSON-like string
-     * @returns a JSON-like string
-     */
-    objectToString(object) {
-        return helper(object, "", [], "<root>");
-    }
-};
+/**
+ * Serializes an object to a pretty-printed JSON-like string. This finds circular references and replaces them in
+ * the output with paths to the target objects.
+ *
+ * E.g.
+ * let obj = {
+ *     aProp: 5,
+ *     meta: {
+ *         name: "my object"
+ *     }
+ * };
+ * obj.name = obj.meta.name;
+ *
+ * objectToString(obj) -->
+ * {
+ *     "aProp": 5,
+ *     "meta": {
+ *         "name": "my object"
+ *     },
+ *     "name": <circular> (<root>.meta.name)
+ * }
+ *
+ * @param object an object to serialize as a JSON-like string
+ * @returns a JSON-like string
+ */
+export function objectToString(object: any): string {
+    return helper(object, "", [], "<root>");
+}

@@ -1,5 +1,6 @@
-const rule = require("../../../lib/rules/ordered-import-members");
-const { RuleTester } = require("eslint");
+import { RuleTester } from "eslint";
+
+import orderedImportMembersRule from "@adashrodEps/lib/rules/ordered-import-members";
 
 const esRuleTester = new RuleTester({
     parserOptions: {
@@ -8,7 +9,7 @@ const esRuleTester = new RuleTester({
     }
 });
 
-esRuleTester.run("ordered-import-members", rule, {
+esRuleTester.run("ordered-import-members", orderedImportMembersRule, {
     valid: [
         `import { Alpha, Bravo, Charlie } from "alphabet";`,
         {
@@ -118,7 +119,7 @@ const tsRuleTester = new RuleTester({
     parser: require.resolve('@typescript-eslint/parser')
 });
 
-tsRuleTester.run("ordered-import-members", rule, {
+tsRuleTester.run("ordered-import-members", orderedImportMembersRule, {
     valid: [`import { annoying, requirement, requires, valid } from "ugh";`],
     invalid: [{
         code: `import type { OnInit } from "@angular/core";\n` +
