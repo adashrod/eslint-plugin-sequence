@@ -587,7 +587,10 @@ function create(context: Rule.RuleContext): Rule.RuleListener {
 
     function checkImportDeclarations(node: ImportDeclaration & Rule.NodeParentExtension): void {
         if (!ignoreImports) {
-            for (const variable of context.getDeclaredVariables(node)) {
+            // compatibility with EsLint 7.x, 8.x and upcoming 9
+            for (const variable of (typeof sourceCode.getDeclaredVariables === "function" ?
+                    sourceCode.getDeclaredVariables(node) :
+                    context.getDeclaredVariables(node))) {
                 log(LogLevel.DEBUG, `ImportDeclaration checking ${variable.name}`);
                 const response = checkValidityAndGetSuggestion(variable.name);
                 if (response.valid) {
