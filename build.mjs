@@ -30,8 +30,11 @@ function copyDir(dirName) {
     });
 }
 
+// at this point the dist dir contains the TSC output
+// remove unit tests from the bundle
 fs.rmSync(`${distDir}/tests`, { recursive: true, force: true });
 
+// copy all non-TS files
 copyDir(`${srcPrefix}docs`);
 copyFile("package.json");
 copyFile("README.md");
