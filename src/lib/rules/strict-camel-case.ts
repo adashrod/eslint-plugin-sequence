@@ -438,6 +438,26 @@ function create(context: Rule.RuleContext): Rule.RuleListener {
         }
     }
 
+    /**
+     * For certain cases, a selector meant to catch declarations will catch the right-hand side, but should not lint in
+     * that case.
+     * e.g.
+     * this.VERSION = "1.0"; // not exempt
+     * this.type = FileTypes.TXT; // exempt because it's referencing something that is declared elsewhere
+     * @param node an identifier node
+     * @returns true if the name should be exempt
+     */
+    function isExemptAssignment(node: (Identifier | PrivateIdentifier) & Rule.NodeParentExtension): boolean {
+        const memberExpression = node.parent;
+        if (memberExpression.type === "MemberExpression") {
+            const assignmentExpression = memberExpression.parent;
+            if (assignmentExpression.type === "AssignmentExpression" && assignmentExpression.right === memberExpression) {
+                return true;
+            }
+        }
+        return false;
+    }
+
     // keep track of reported tokens to not report twice
     const reported = new Set<number>();
 
@@ -562,8 +582,12 @@ function create(context: Rule.RuleContext): Rule.RuleListener {
     }
 
     function checkClassFieldsMethodsAndObjectFieldsMethods(
-            node: Identifier | PrivateIdentifier,
+            node: (Identifier | PrivateIdentifier) & Rule.NodeParentExtension,
             singleWordExemptionType?: IgnoreSingleWordsIn): void {
+        if (isExemptAssignment(node)) {
+            log(LogLevel.TRACE, `skipping object property in RHS of assignment expression`);
+            return;
+        }
         if (!ignoreProperties) {
             log(LogLevel.DEBUG, `class/object field/method declarations checking ${node.name}`);
             const response = checkValidityAndGetSuggestion(node.name,
@@ -648,13 +672,12 @@ function create(context: Rule.RuleContext): Rule.RuleListener {
         TSEnumDeclaration: checkDeclarations,
         FunctionDeclaration: checkDeclarations,
         FunctionExpression: checkDeclarations,
-        VariableDeclaration:
-            (node: VariableDeclaration & Rule.NodeParentExtension) =>
-                checkDeclarations(node, node.kind === "const" ? IgnoreSingleWordsIn.FIRST_CLASS_CONSTANT : undefined),
+        VariableDeclaration: (node: VariableDeclaration & Rule.NodeParentExtension) =>
+            checkDeclarations(node, node.kind === "const" ? IgnoreSingleWordsIn.FIRST_CLASS_CONSTANT : undefined),
 
         // ---object literals---
-        "ObjectExpression > Property > Identifier.key":
-            (node: Identifier) => checkClassFieldsMethodsAndObjectFieldsMethods(node, IgnoreSingleWordsIn.OBJECT_FIELD),
+        "ObjectExpression > Property > Identifier.key": (node: Identifier & Rule.NodeParentExtension) =>
+            checkClassFieldsMethodsAndObjectFieldsMethods(node, IgnoreSingleWordsIn.OBJECT_FIELD),
         // ---instance functions on classes---
         "MethodDefinition > Identifier.key": checkClassFieldsMethodsAndObjectFieldsMethods,
         // ---TS-only: class instance and static props---
@@ -668,7 +691,8 @@ function create(context: Rule.RuleContext): Rule.RuleListener {
             checkClassFieldsMethodsAndObjectFieldsMethods,
         // ---class props `this.xyz = ...`, `window.abc = ...`---
         "AssignmentExpression > MemberExpression > Identifier.property":
-            (node: Identifier) => checkClassFieldsMethodsAndObjectFieldsMethods(node, IgnoreSingleWordsIn.OBJECT_FIELD),
+            (node: Identifier & Rule.NodeParentExtension) =>
+                checkClassFieldsMethodsAndObjectFieldsMethods(node, IgnoreSingleWordsIn.OBJECT_FIELD),
         // TS interface fields
         "TSInterfaceDeclaration > TSInterfaceBody > TSPropertySignature > Identifier.key":
             checkClassFieldsMethodsAndObjectFieldsMethods,
@@ -678,8 +702,8 @@ function create(context: Rule.RuleContext): Rule.RuleListener {
         "TSTypeAliasDeclaration > TSTypeLiteral > TSPropertySignature > Identifier.key":
             checkClassFieldsMethodsAndObjectFieldsMethods,
         // TS enum members
-        "TSEnumDeclaration > TSEnumMember > Identifier.id":
-            (node: Identifier) => checkClassFieldsMethodsAndObjectFieldsMethods(node, IgnoreSingleWordsIn.ENUM_MEMBER),
+        "TSEnumDeclaration > TSEnumMember > Identifier.id": (node: Identifier & Rule.NodeParentExtension) =>
+            checkClassFieldsMethodsAndObjectFieldsMethods(node, IgnoreSingleWordsIn.ENUM_MEMBER),
 
         ImportDeclaration: checkImportDeclarations,
 

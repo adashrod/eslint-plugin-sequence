@@ -114,6 +114,10 @@ es13RuleTester.run("strict-camel-case", strictCamelCaseRule, {
         `import MyClass from "MyClass";
         console.log(MyClass.VERSION);
         `,
+        `import Status from "status";
+        const a = Status.GOOD;
+        this.a = Status.BAD;
+        `,
         {
             code: `export const MAX = 10;`,
             options: [{ ignoreSingleWordsIn: [ "first_class_constant" ] }]
@@ -449,11 +453,11 @@ tsRuleTester.run("strict-camel-case", strictCamelCaseRule, {
         },
         {
             code: `enum Direction { NORTH, EAST, SOUTH, WEST }`,
-            options: [{ ignoreSingleWordsIn: ["enum_member"]}]
+            options: [{ ignoreSingleWordsIn: ["enum_member"] }]
         },
         {
             code: `class Util { public static NAME = "TheUtil"; }`,
-            options: [{ ignoreSingleWordsIn: ["static_class_field"]}]
+            options: [{ ignoreSingleWordsIn: ["static_class_field"] }]
         }
     ],
     invalid: [{
