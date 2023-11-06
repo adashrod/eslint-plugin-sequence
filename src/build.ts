@@ -3,15 +3,15 @@ import fs from "fs";
 const distDir = "dist";
 const srcPrefix = "src/";
 
-function truncateSrc(path) {
+function truncateSrc(path: string): string {
     return path.startsWith(srcPrefix) ? path.slice(srcPrefix.length) : path;
 }
 
-function copyFile(fileName) {
+function copyFile(fileName: string): void {
     fs.copyFileSync(fileName, `${distDir}/${truncateSrc(fileName)}`);
 }
 
-function copyDir(dirName) {
+function copyDir(dirName: string): void {
     const dest = truncateSrc(dirName);
     fs.mkdirSync(`${distDir}/${dest}`, { recursive: true });
     fs.readdir(dirName, {}, (err, files) => {
@@ -31,8 +31,9 @@ function copyDir(dirName) {
 }
 
 // at this point the dist dir contains the TSC output
-// remove unit tests from the bundle
+// remove unit tests and this script from the bundle
 fs.rmSync(`${distDir}/tests`, { recursive: true, force: true });
+fs.rmSync(`${distDir}/build.js`);
 
 // copy all non-TS files
 copyDir(`${srcPrefix}docs`);

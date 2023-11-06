@@ -18,7 +18,7 @@
     },
     "scripts": {
         "test": "ts-node src/tests/test-all.ts",
-        "build": "rm -rf dist; tsc; node build.mjs"
+        "build": "rm -rf dist; tsc; ts-node src/build.ts"
     },
     "type": "commonjs",
     "repository": {
