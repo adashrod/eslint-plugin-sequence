@@ -11,6 +11,7 @@ __dirname == <root>/src/tests
 addAlias("@adashrodEps",  `${__dirname}/..`);
 
 import "@adashrodEps/tests/rules/logical-expression-complexity";
+import "@adashrodEps/tests/rules/ordered-destructuring";
 import "@adashrodEps/tests/rules/ordered-import-members";
 import "@adashrodEps/tests/rules/ordered-imports-by-path";
 import "@adashrodEps/tests/rules/strict-camel-case";
