@@ -10,7 +10,7 @@ import type {
 } from "estree";
 
 import { objectToString } from "@adashrodEps/lib/rules/util/serialization";
-
+import { initializeConfig } from "@adashrodEps/lib/rules/util/eslint";
 
 /**
  * @fileoverview Rule to enforce strict camel case in identifiers
@@ -30,6 +30,24 @@ enum IgnoreSingleWordsIn {
     STATIC_CLASS_FIELD = "static_class_field"
 }
 
+type Config = {
+    ignoreProperties: boolean;
+    ignoreImports: boolean;
+    ignoredIdentifiers: string[];
+    allowOneCharWords: AllowOneCharWords;
+    ignoreSingleWords: boolean;
+    ignoreSingleWordsIn: IgnoreSingleWordsIn[]
+}
+
+const DEFAULT_PROPERTIES: Config = {
+    ignoreProperties: false,
+    ignoreImports: false,
+    ignoredIdentifiers: [],
+    allowOneCharWords: AllowOneCharWords.NEVER,
+    ignoreSingleWords: false,
+    ignoreSingleWordsIn: []
+};
+
 const meta: Rule.RuleMetaData = {
     type: "suggestion",
 
@@ -44,11 +62,11 @@ const meta: Rule.RuleMetaData = {
         properties: {
             ignoreProperties: {
                 type: "boolean",
-                default: false
+                default: DEFAULT_PROPERTIES.ignoreProperties
             },
             ignoreImports: {
                 type: "boolean",
-                default: false
+                default: DEFAULT_PROPERTIES.ignoreImports
             },
             ignoredIdentifiers: {
                 type: "array",
@@ -56,7 +74,8 @@ const meta: Rule.RuleMetaData = {
                     type: "string"
                 }],
                 minItems: 0,
-                uniqueItems: true
+                uniqueItems: true,
+                default: DEFAULT_PROPERTIES.ignoredIdentifiers
             },
             allowOneCharWords: {
                 type: "string",
@@ -65,11 +84,11 @@ const meta: Rule.RuleMetaData = {
                     AllowOneCharWords.ALWAYS,
                     AllowOneCharWords.LAST
                 ],
-                default: AllowOneCharWords.NEVER
+                default: DEFAULT_PROPERTIES.allowOneCharWords
             },
             ignoreSingleWords: {
                 type: "boolean",
-                default: false
+                default: DEFAULT_PROPERTIES.ignoreSingleWords
             },
             ignoreSingleWordsIn: {
                 type: "array",
@@ -82,7 +101,8 @@ const meta: Rule.RuleMetaData = {
                     ]
                 },
                 minItems: 0,
-                uniqueItems: true
+                uniqueItems: true,
+                default: DEFAULT_PROPERTIES.ignoreSingleWordsIn
             }
         },
         additionalProperties: false
@@ -124,13 +144,7 @@ const ORDERED_LOG_LEVELS = [
 ];
 
 function create(context: Rule.RuleContext): Rule.RuleListener {
-    const options = context.options[0] || {},
-        ignoreProperties = (options.ignoreProperties ?? false) as boolean,
-        ignoreImports = (options.ignoreImports ?? false) as boolean,
-        ignoredIdentifiers = (options.ignoredIdentifiers || []) as string[],
-        allowOneCharWords = (options.allowOneCharWords || AllowOneCharWords.NEVER) as AllowOneCharWords,
-        ignoreSingleWords = (options.ignoreSingleWords ?? false) as boolean,
-        ignoreSingleWordsIn = (options.ignoreSingleWordsIn ?? []) as IgnoreSingleWordsIn[],
+    const cfg = initializeConfig(context.options, DEFAULT_PROPERTIES),
         // context.getSourceCode() is deprecated, but context.sourceCode is always undefined
         sourceCode = context.sourceCode ?? context.getSourceCode();
 
@@ -379,9 +393,9 @@ function create(context: Rule.RuleContext): Rule.RuleListener {
     } {
         let valid = false;
         let tokens: string[] = [];
-        if (ignoredIdentifiers.includes(s)) {
+        if (cfg.ignoredIdentifiers.includes(s)) {
             valid = true;
-        } else if (isAllCapsAndDigits(s) && (ignoreSingleWords || ignoreAllCapsIfSingleWord)) {
+        } else if (isAllCapsAndDigits(s) && (cfg.ignoreSingleWords || ignoreAllCapsIfSingleWord)) {
             // using isAllCapsAndDigits and not isAllCaps to allow one-word names like "HTML5". This is a slight
             // deviation from the tokenization behavior in that tokenize() still treats "HTML5" as two tokens, but
             // fixing that tokenization to match this wouldn't affect the suggestions and the tokens aren't exposed
@@ -414,9 +428,9 @@ function create(context: Rule.RuleContext): Rule.RuleListener {
             const invalidIndexes: number[] = [];
             tokens.forEach((token, i) => {
                 if (isAllCaps(token)) {
-                    if (token.length > 1 || allowOneCharWords === "never") {
+                    if (token.length > 1 || cfg.allowOneCharWords === "never") {
                         invalidIndexes.push(i);
-                    } else if (allowOneCharWords === "last" &&
+                    } else if (cfg.allowOneCharWords === "last" &&
                             // one-char word is last word
                             !(i + 1 === tokens.length ||
                                 // one-char word is last word before trailing underscores
@@ -556,7 +570,7 @@ function create(context: Rule.RuleContext): Rule.RuleListener {
                 context.getDeclaredVariables(node))) { // funcName+params, mult var decl in one stmt
             log(LogLevel.DEBUG, `*Declaration checking variable.name=${variable.name}`);
             const response = checkValidityAndGetSuggestion(variable.name,
-                ignoreSingleWordsIn.includes(singleWordExemptionType as IgnoreSingleWordsIn));
+                cfg.ignoreSingleWordsIn.includes(singleWordExemptionType as IgnoreSingleWordsIn));
             if (response.valid) {
                 log(LogLevel.TRACE, `*Declaration: PASS variable.name=${variable.name}`);
                 continue;
@@ -588,10 +602,10 @@ function create(context: Rule.RuleContext): Rule.RuleListener {
             log(LogLevel.TRACE, `skipping object property in RHS of assignment expression`);
             return;
         }
-        if (!ignoreProperties) {
+        if (!cfg.ignoreProperties) {
             log(LogLevel.DEBUG, `class/object field/method declarations checking ${node.name}`);
             const response = checkValidityAndGetSuggestion(node.name,
-                ignoreSingleWordsIn.includes(singleWordExemptionType as IgnoreSingleWordsIn));
+                cfg.ignoreSingleWordsIn.includes(singleWordExemptionType as IgnoreSingleWordsIn));
             if (!response.valid) {
                 log(LogLevel.TRACE, () => [`Field/method declarations reporting ${node.name}`, objectToString(node)]);
                 report(node, response.suggestion, "Field/method declarations");
@@ -610,7 +624,7 @@ function create(context: Rule.RuleContext): Rule.RuleListener {
     }
 
     function checkImportDeclarations(node: ImportDeclaration & Rule.NodeParentExtension): void {
-        if (!ignoreImports) {
+        if (!cfg.ignoreImports) {
             // compatibility with EsLint 7.x, 8.x and upcoming 9
             for (const variable of (typeof sourceCode.getDeclaredVariables === "function" ?
                     sourceCode.getDeclaredVariables(node) :

@@ -8,6 +8,17 @@ import type {
 } from "estree";
 
 import { findPunctuatorAfter, findPunctuatorBetween } from "@adashrodEps/lib/rules/util/ast";
+import { initializeConfig } from "@adashrodEps/lib/rules/util/eslint";
+
+type Config = {
+    ignoreCase: boolean;
+    sortSpecifiersWithComments: boolean;
+}
+
+const DEFAULT_PROPERTIES: Config = {
+    ignoreCase: false,
+    sortSpecifiersWithComments: false
+};
 
 /**
  * @fileoverview Rule to enforce ordering of import members by name
@@ -27,11 +38,11 @@ const meta: Rule.RuleMetaData = {
         properties: {
             ignoreCase: {
                 type: "boolean",
-                default: false
+                default: DEFAULT_PROPERTIES.ignoreCase
             },
             sortSpecifiersWithComments: {
                 type: "boolean",
-                default: false
+                default: DEFAULT_PROPERTIES.sortSpecifiersWithComments
             }
         },
         additionalProperties: false
@@ -48,9 +59,7 @@ const meta: Rule.RuleMetaData = {
 type GenericSpecifier = ImportSpecifier | ImportDefaultSpecifier | ImportNamespaceSpecifier;
 
 function create(context: Rule.RuleContext): Rule.RuleListener {
-    const configuration = context.options[0] || {},
-        ignoreCase = (configuration.ignoreCase ?? false) as boolean,
-        sortSpecifiersWithComments = (configuration.sortSpecifiersWithComments ?? false) as boolean,
+    const cfg = initializeConfig(context.options, DEFAULT_PROPERTIES),
         // context.getSourceCode() is deprecated, but context.sourceCode is always undefined
         sourceCode = context.sourceCode ?? context.getSourceCode();
 
@@ -62,8 +71,8 @@ function create(context: Rule.RuleContext): Rule.RuleListener {
      * @returns comparator result
      */
     function importSpecifierComparator(specifierA: GenericSpecifier, specifierB: GenericSpecifier): number {
-        const nameA = ignoreCase ? specifierA.local.name.toLowerCase() : specifierA.local.name;
-        const nameB = ignoreCase ? specifierB.local.name.toLowerCase() : specifierB.local.name;
+        const nameA = cfg.ignoreCase ? specifierA.local.name.toLowerCase() : specifierA.local.name;
+        const nameB = cfg.ignoreCase ? specifierB.local.name.toLowerCase() : specifierB.local.name;
         return nameA > nameB ? 1 : -1;
     }
 
@@ -144,8 +153,8 @@ function create(context: Rule.RuleContext): Rule.RuleListener {
                 )
                 // at this point the mapped strings contain the specifiers, commas, and comments
                 .sort((specifierStringA, specifierStringB) => {
-                    const nameA = ignoreCase ? specifierStringA.toLowerCase() : specifierStringA;
-                    const nameB = ignoreCase ? specifierStringB.toLowerCase() : specifierStringB;
+                    const nameA = cfg.ignoreCase ? specifierStringA.toLowerCase() : specifierStringA;
+                    const nameB = cfg.ignoreCase ? specifierStringB.toLowerCase() : specifierStringB;
                     return nameA > nameB ? 1 : -1;
                 })
                 .join("")
@@ -176,7 +185,7 @@ function create(context: Rule.RuleContext): Rule.RuleListener {
                             sourceCode.getCommentsBefore(specifier).length ||
                                 sourceCode.getCommentsAfter(specifier).length);
                         if (specifiersHaveComments) {
-                            return sortSpecifiersWithComments ?
+                            return cfg.sortSpecifiersWithComments ?
                                 fixSpecifiersWithComments(
                                     fixer,
                                     (node.parent as Program as Ast.Program).tokens,

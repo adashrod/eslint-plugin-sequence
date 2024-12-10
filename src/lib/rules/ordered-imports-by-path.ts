@@ -1,6 +1,22 @@
 import type { AST as Ast, Rule } from "eslint";
 import type { ImportDeclaration, Program } from "estree";
 
+import { initializeConfig } from "@adashrodEps/lib/rules/util/eslint";
+
+type Config = {
+    ignoreCase: boolean;
+    allowSeparateGroups: boolean;
+    sortSideEffectsFirst: boolean;
+    sortTypeImportsFirst: boolean | undefined;
+}
+
+const DEFAULT_PROPERTIES: Config = {
+    ignoreCase: false,
+    allowSeparateGroups: true,
+    sortSideEffectsFirst: false,
+    sortTypeImportsFirst: undefined
+};
+
 /**
  * @fileoverview Rule to enforce ordering of imports by path
  * @author Aaron Rodriguez
@@ -20,18 +36,19 @@ const meta: Rule.RuleMetaData = {
         properties: {
             ignoreCase: {
                 type: "boolean",
-                default: false
+                default: DEFAULT_PROPERTIES.ignoreCase
             },
             allowSeparateGroups: {
                 type: "boolean",
-                default: true
+                default: DEFAULT_PROPERTIES.allowSeparateGroups
             },
             sortSideEffectsFirst: {
                 type: "boolean",
-                default: false
+                default: DEFAULT_PROPERTIES.sortSideEffectsFirst
             },
             sortTypeImportsFirst: {
-                type: "boolean"
+                type: "boolean",
+                default: DEFAULT_PROPERTIES.sortTypeImportsFirst
             }
         },
         additionalProperties: false
@@ -55,11 +72,7 @@ type TypeCapableImportDeclaration = ImportDeclaration & {
 };
 
 function create(context: Rule.RuleContext): Rule.RuleListener {
-    const configuration = context.options[0] || {},
-        ignoreCase = (configuration.ignoreCase ?? false) as boolean,
-        allowSeparateGroups = (configuration.allowSeparateGroups ?? true) as boolean,
-        sortTypeImportsFirst = configuration.sortTypeImportsFirst as boolean | undefined,
-        sortSideEffectsFirst = (configuration.sortSideEffectsFirst ?? false) as boolean,
+    const cfg = initializeConfig(context.options, DEFAULT_PROPERTIES),
         // context.getSourceCode() is deprecated, but context.sourceCode is always undefined
         sourceCode = context.sourceCode ?? context.getSourceCode();
 
@@ -71,10 +84,10 @@ function create(context: Rule.RuleContext): Rule.RuleListener {
      * for configuring the how the comparator should sort `import Thing` and `import type OtherThing`
      */
     let leftNodeIsTypeReturn: number, rightNodeIsTypeReturn: number;
-    if (sortTypeImportsFirst === true) {
+    if (cfg.sortTypeImportsFirst === true) {
         leftNodeIsTypeReturn = -1;
         rightNodeIsTypeReturn = 1;
-    } else if (sortTypeImportsFirst === false) {
+    } else if (cfg.sortTypeImportsFirst === false) {
         leftNodeIsTypeReturn = 1;
         rightNodeIsTypeReturn = -1;
     } else {
@@ -146,7 +159,7 @@ function create(context: Rule.RuleContext): Rule.RuleListener {
     function getGroupOfAdjacentImports(node: ImportDeclaration & Rule.NodeParentExtension): ImportDeclaration[] {
         let allImports = (node.parent as Program as Ast.Program)
             .body.filter((aBodyNode) => aBodyNode.type === "ImportDeclaration") as ImportDeclaration[];
-        if (!allowSeparateGroups) {
+        if (!cfg.allowSeparateGroups) {
             return allImports.slice();
         }
         let nodeIndex = allImports.indexOf(node);
@@ -180,15 +193,15 @@ function create(context: Rule.RuleContext): Rule.RuleListener {
      * @returns comparator result
      */
     function importDeclarationComparator(declarationA: ImportDeclaration, declarationB: ImportDeclaration) {
-        if (sortSideEffectsFirst) {
+        if (cfg.sortSideEffectsFirst) {
             const leftIsSideEffectsModule = declarationA.specifiers.length === 0;
             const rightIsSideEffectsModule = declarationB.specifiers.length === 0;
             if (leftIsSideEffectsModule != rightIsSideEffectsModule) {
                 return leftIsSideEffectsModule ? -1 : 1;
             }
         }
-        const nameA = ignoreCase ? getPathName(declarationA).toLowerCase() : getPathName(declarationA);
-        const nameB = ignoreCase ? getPathName(declarationB).toLowerCase() : getPathName(declarationB);
+        const nameA = cfg.ignoreCase ? getPathName(declarationA).toLowerCase() : getPathName(declarationA);
+        const nameB = cfg.ignoreCase ? getPathName(declarationB).toLowerCase() : getPathName(declarationB);
         if (nameA === nameB) {
             const da = declarationA as TypeCapableImportDeclaration;
             const db = declarationB as TypeCapableImportDeclaration;
@@ -235,12 +248,12 @@ function create(context: Rule.RuleContext): Rule.RuleListener {
             declarationB: ImportDeclaration): boolean {
         const leftIsSideEffectsModule = declarationA.specifiers.length === 0;
         const rightIsSideEffectsModule = declarationB.specifiers.length === 0;
-        return sortSideEffectsFirst && leftIsSideEffectsModule !== rightIsSideEffectsModule;
+        return cfg.sortSideEffectsFirst && leftIsSideEffectsModule !== rightIsSideEffectsModule;
     }
 
     return {
         ImportDeclaration: (node: ImportDeclaration & Rule.NodeParentExtension) => {
-            if (previousDeclaration && allowSeparateGroups && !nodesAreAdjacent(previousDeclaration, node)) {
+            if (previousDeclaration && cfg.allowSeparateGroups && !nodesAreAdjacent(previousDeclaration, node)) {
                 // reset for next group
                 previousDeclaration = null;
             }
@@ -253,7 +266,7 @@ function create(context: Rule.RuleContext): Rule.RuleListener {
                     messageId = "sortTypeImports"
                     nameA = sourceCode.getText(node);
                     nameB = sourceCode.getText(previousDeclaration);
-                    typeStyle = sortTypeImportsFirst ? "before" : "after";
+                    typeStyle = cfg.sortTypeImportsFirst ? "before" : "after";
                 } else if (shouldReportSideEffectsModuleMessage(node, previousDeclaration)) {
                     messageId = "sortSideEffectsFirst";
                     nameA = sourceCode.getText(node);

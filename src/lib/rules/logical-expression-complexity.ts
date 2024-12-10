@@ -7,6 +7,8 @@ import type {
     UnaryExpression
 } from "estree";
 
+import { initializeConfig } from "@adashrodEps/lib/rules/util/eslint";
+
 enum BinaryOperator {
     EQUALS = "==",
     STRICT_EQUALS = "===",
@@ -17,6 +19,20 @@ enum BinaryOperator {
     GREATER_THAN = ">",
     GREATER_THAN_EQUAL = ">="
 }
+
+type Config = {
+    maxHeight: number;
+    maxTerms: number;
+    binaryOperators: BinaryOperator[],
+    includeTernary: boolean;
+}
+
+const DEFAULT_PROPERTIES: Config = {
+    maxHeight: 2,
+    maxTerms: 4,
+    binaryOperators: [],
+    includeTernary: true
+};
 
 /**
  * @fileoverview Rule to flag overly complex logical expressions
@@ -37,11 +53,11 @@ const meta: Rule.RuleMetaData = {
         properties: {
             maxHeight: {
                 type: "number",
-                default: 2
+                default: DEFAULT_PROPERTIES.maxHeight
             },
             maxTerms: {
                 type: "number",
-                default: 4
+                default: DEFAULT_PROPERTIES.maxTerms
             },
             binaryOperators: {
                 type: "array",
@@ -59,11 +75,11 @@ const meta: Rule.RuleMetaData = {
                 },
                 minItems: 0,
                 uniqueItems: true,
-                default: []
+                default: DEFAULT_PROPERTIES.binaryOperators
             },
             includeTernary: {
                 type: "boolean",
-                default: true
+                default: DEFAULT_PROPERTIES.includeTernary
             }
         },
         additionalProperties: false
@@ -76,11 +92,7 @@ const meta: Rule.RuleMetaData = {
 };
 
 function create(context: Rule.RuleContext): Rule.RuleListener {
-    const configuration = context.options[0] || {},
-        maxHeight = (configuration.maxHeight ?? 2) as number,
-        maxTerms = (configuration.maxTerms ?? 4) as number,
-        binaryOperators = (configuration.binaryOperators ?? []) as BinaryOperator[],
-        includeTernary = (configuration.includeTernary ?? true) as boolean;
+    const cfg = initializeConfig(context.options, DEFAULT_PROPERTIES);
 
     const heightObserved = new Set<number>();
     const countObserved = new Set<number>();
@@ -100,13 +112,13 @@ function create(context: Rule.RuleContext): Rule.RuleListener {
             heightObserved.add(node.range[0]);
         }
         if (node.type === "LogicalExpression" ||
-                node.type === "BinaryExpression" && binaryOperators.includes(node.operator as BinaryOperator)) {
+                node.type === "BinaryExpression" && cfg.binaryOperators.includes(node.operator as BinaryOperator)) {
             const leftHeight = calculateHeight(node.left);
             const rightHeight = calculateHeight(node.right);
             return Math.max(leftHeight, rightHeight) + 1;
         } else if (node.type === "UnaryExpression" && node.operator === "!") {
             return calculateHeight(node.argument) + 1;
-        } else if (node.type === "ConditionalExpression" && includeTernary) {
+        } else if (node.type === "ConditionalExpression" && cfg.includeTernary) {
             const testHeight = calculateHeight(node.test);
             const consequentHeight = calculateHeight(node.consequent);
             const alternateHeight = calculateHeight(node.alternate);
@@ -130,18 +142,18 @@ function create(context: Rule.RuleContext): Rule.RuleListener {
             countObserved.add(node.range[0]);
         }
         if (node.type === "LogicalExpression" ||
-                node.type === "BinaryExpression" && binaryOperators.includes(node.operator as BinaryOperator)) {
+                node.type === "BinaryExpression" && cfg.binaryOperators.includes(node.operator as BinaryOperator)) {
             return countTerms(node.left) + countTerms(node.right);
         } else if (node.type === "UnaryExpression" && node.operator === "!") {
             return countTerms(node.argument);
-        } else if (node.type === "ConditionalExpression" && includeTernary) {
+        } else if (node.type === "ConditionalExpression" && cfg.includeTernary) {
             return countTerms(node.test) + countTerms(node.consequent) + countTerms(node.alternate);
         }
         return 1;
     }
 
     let selector = "BinaryExpression,LogicalExpression,UnaryExpression";
-    if (includeTernary) {
+    if (cfg.includeTernary) {
         selector += ",ConditionalExpression";
     }
 
@@ -150,31 +162,31 @@ function create(context: Rule.RuleContext): Rule.RuleListener {
             if (node.type === "UnaryExpression" && node.operator !== "!") {
                 return;
             }
-            if (node.type === "BinaryExpression" && !binaryOperators.includes(node.operator as BinaryOperator)) {
+            if (node.type === "BinaryExpression" && !cfg.binaryOperators.includes(node.operator as BinaryOperator)) {
                 return;
             }
-            if (maxHeight > 0 && node.range && !heightObserved.has(node.range[0])) {
+            if (cfg.maxHeight > 0 && node.range && !heightObserved.has(node.range[0])) {
                 const expressionHeight = calculateHeight(node);
-                if (expressionHeight > maxHeight) {
+                if (expressionHeight > cfg.maxHeight) {
                     context.report({
                         node,
                         messageId: "tooTall",
                         data: {
                             height: expressionHeight.toString(),
-                            maxAllowed: maxHeight.toString()
+                            maxAllowed: cfg.maxHeight.toString()
                         }
                     });
                 }
             }
-            if (maxTerms > 0 && node.range && !countObserved.has(node.range[0])) {
+            if (cfg.maxTerms > 0 && node.range && !countObserved.has(node.range[0])) {
                 const numExpressionTerms = countTerms(node);
-                if (numExpressionTerms > maxTerms) {
+                if (numExpressionTerms > cfg.maxTerms) {
                     context.report({
                         node,
                         messageId: "tooManyTerms",
                         data: {
                             numTerms: numExpressionTerms.toString(),
-                            maxAllowed: maxTerms.toString()
+                            maxAllowed: cfg.maxTerms.toString()
                         }
                     });
                 }
