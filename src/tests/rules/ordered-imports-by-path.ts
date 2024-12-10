@@ -176,7 +176,12 @@ tsRuleTester.run("ordered-imports-by-path", orderedImportsByPathRule, {
         code: `import type { List } from "Collections";\n` +
             `import { ArrayList } from "Collections";\n`,
         options: [{sortTypeImportsFirst: true}]
-    }],
+    },
+    `import { ArrayList } from "Collections";\n` +
+        `import type { List } from "Collections";\n`,
+    `import type { List } from "Collections";\n` +
+        `import { ArrayList } from "Collections";\n`
+    ],
     invalid: [{
         code: `import type { List } from "Collections";\n` +
             `import { ArrayList } from "Collections";\n`,

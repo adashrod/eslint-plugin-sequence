@@ -97,11 +97,14 @@ import fetch from "node-fetch";
 ## sortTypeImportsFirst (TypeScript only)
 -----------------------
 
-type: `boolean`
+type: `boolean` | `undefined`
 
-default: `true`
+default: `undefined`
 
 Since TypeScript allows importing both types and values, it's possible to have 2 imports with the same path. This parameter determines whether the type imports come before or after value imports with the same path.
+
+Fun fact: with TypeScript 5+, it's no longer necessary to explicitly use type imports to minimize the size of the output JS when using the TS compiler. The TS compiler can determine if an import is only being used as a type and won't include the import in the output; this is called import elision.
+
 
 `true`: valid format:
 ```javascript
@@ -114,3 +117,5 @@ import { Admin } from "@app/user";
 import { Admin } from "@app/user";
 import type { User } from "@app/user";
 ```
+
+`undefined`: if this option is omitted, the order of type imports vs. regular imports is ignored, i.e. both examples above pass

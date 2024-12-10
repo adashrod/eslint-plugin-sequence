@@ -31,8 +31,7 @@ const meta: Rule.RuleMetaData = {
                 default: false
             },
             sortTypeImportsFirst: {
-                type: "boolean",
-                default: true
+                type: "boolean"
             }
         },
         additionalProperties: false
@@ -59,7 +58,7 @@ function create(context: Rule.RuleContext): Rule.RuleListener {
     const configuration = context.options[0] || {},
         ignoreCase = (configuration.ignoreCase ?? false) as boolean,
         allowSeparateGroups = (configuration.allowSeparateGroups ?? true) as boolean,
-        sortTypeImportsFirst = (configuration.sortTypeImportsFirst ?? true) as boolean,
+        sortTypeImportsFirst = configuration.sortTypeImportsFirst as boolean | undefined,
         sortSideEffectsFirst = (configuration.sortSideEffectsFirst ?? false) as boolean,
         // context.getSourceCode() is deprecated, but context.sourceCode is always undefined
         sourceCode = context.sourceCode ?? context.getSourceCode();
@@ -72,12 +71,16 @@ function create(context: Rule.RuleContext): Rule.RuleListener {
      * for configuring the how the comparator should sort `import Thing` and `import type OtherThing`
      */
     let leftNodeIsTypeReturn: number, rightNodeIsTypeReturn: number;
-    if (sortTypeImportsFirst) {
+    if (sortTypeImportsFirst === true) {
         leftNodeIsTypeReturn = -1;
         rightNodeIsTypeReturn = 1;
-    } else {
+    } else if (sortTypeImportsFirst === false) {
         leftNodeIsTypeReturn = 1;
         rightNodeIsTypeReturn = -1;
+    } else {
+        // user didn't specify option, treat the two imports as equal
+        leftNodeIsTypeReturn = 0;
+        rightNodeIsTypeReturn = 0;
     }
 
     /**
@@ -167,8 +170,9 @@ function create(context: Rule.RuleContext): Rule.RuleListener {
      * Comparator for sorting ImportDeclaration AstNodes by path
      * Note: if sortSideEffectsFirst is true, this function sorts those earlier in a list than any other imports
      * Note: given 2 ImportDeclarations with the same path (one value import and one type import), if
-     * sortTypeImportsFirst is true, the type import will be sorted first, otherwise it will be sorted after the
-     * value import.
+     * sortTypeImportsFirst is true, the type import will be sorted first, false: it will be sorted after the
+     * value import, undefined: order doesn't matter
+     *
      * Note: also factors in the value of ignoreCase
      *
      * @param declarationA an ImportDeclaration
