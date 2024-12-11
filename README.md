@@ -46,11 +46,9 @@ Configure with EsLint, e.g. in `.eslintrc.json`
     ],
     "sequence/strict-camel-case": [
         "error", {
-            "ignoreProperties": false,
             "ignoreImports": false,
             "ignoredIdentifiers": ["legacyAPI", "htmlToXML", "PI", "TAU", "EPSILON"],
             "allowOneCharWords": "last",
-            "ignoreSingleWords": false,
             "ignoreSingleWordsIn": ["enum_member", "static_class_field"]
         }
     ],
