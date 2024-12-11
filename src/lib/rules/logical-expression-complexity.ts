@@ -1,6 +1,7 @@
 import type { Rule } from "eslint";
 import type {
     BinaryExpression,
+    BinaryOperator,
     ConditionalExpression,
     Expression,
     LogicalExpression,
@@ -9,7 +10,11 @@ import type {
 
 import { initializeConfig } from "@adashrodEps/lib/rules/util/eslint";
 
-enum BinaryOperator {
+// exists just to add a bit of type safety in the schema: the code uses BinaryOperator from estree, but schema
+// validation will ensure that only this subset is used in config
+// using `type MyOpType = Extract<BinaryOperator, ...>` doesn't work because then TS complains about values not in this
+// subset not being assignable to this
+enum BinaryOperatorAsEnum {
     EQUALS = "==",
     STRICT_EQUALS = "===",
     NOT_EQUAL = "!=",
@@ -63,14 +68,14 @@ const meta: Rule.RuleMetaData = {
                 type: "array",
                 items: {
                     enum: [
-                        BinaryOperator.EQUALS,
-                        BinaryOperator.STRICT_EQUALS,
-                        BinaryOperator.NOT_EQUAL,
-                        BinaryOperator.STRICT_NOT_EQUAL,
-                        BinaryOperator.LESS_THAN,
-                        BinaryOperator.LESS_THAN_EQUAL,
-                        BinaryOperator.GREATER_THAN,
-                        BinaryOperator.GREATER_THAN_EQUAL
+                        BinaryOperatorAsEnum.EQUALS,
+                        BinaryOperatorAsEnum.STRICT_EQUALS,
+                        BinaryOperatorAsEnum.NOT_EQUAL,
+                        BinaryOperatorAsEnum.STRICT_NOT_EQUAL,
+                        BinaryOperatorAsEnum.LESS_THAN,
+                        BinaryOperatorAsEnum.LESS_THAN_EQUAL,
+                        BinaryOperatorAsEnum.GREATER_THAN,
+                        BinaryOperatorAsEnum.GREATER_THAN_EQUAL
                     ]
                 },
                 minItems: 0,
@@ -112,7 +117,7 @@ function create(context: Rule.RuleContext): Rule.RuleListener {
             heightObserved.add(node.range[0]);
         }
         if (node.type === "LogicalExpression" ||
-                node.type === "BinaryExpression" && cfg.binaryOperators.includes(node.operator as BinaryOperator)) {
+                node.type === "BinaryExpression" && cfg.binaryOperators.includes(node.operator)) {
             const leftHeight = calculateHeight(node.left);
             const rightHeight = calculateHeight(node.right);
             return Math.max(leftHeight, rightHeight) + 1;
@@ -142,7 +147,7 @@ function create(context: Rule.RuleContext): Rule.RuleListener {
             countObserved.add(node.range[0]);
         }
         if (node.type === "LogicalExpression" ||
-                node.type === "BinaryExpression" && cfg.binaryOperators.includes(node.operator as BinaryOperator)) {
+                node.type === "BinaryExpression" && cfg.binaryOperators.includes(node.operator)) {
             return countTerms(node.left) + countTerms(node.right);
         } else if (node.type === "UnaryExpression" && node.operator === "!") {
             return countTerms(node.argument);
@@ -162,7 +167,7 @@ function create(context: Rule.RuleContext): Rule.RuleListener {
             if (node.type === "UnaryExpression" && node.operator !== "!") {
                 return;
             }
-            if (node.type === "BinaryExpression" && !cfg.binaryOperators.includes(node.operator as BinaryOperator)) {
+            if (node.type === "BinaryExpression" && !cfg.binaryOperators.includes(node.operator)) {
                 return;
             }
             if (cfg.maxHeight > 0 && node.range && !heightObserved.has(node.range[0])) {
