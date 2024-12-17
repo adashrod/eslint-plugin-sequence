@@ -2,12 +2,14 @@ import { RuleTester } from "eslint";
 
 import logicalExpressionComplexityRule from "@adashrodEps/lib/rules/logical-expression-complexity";
 
-const es5RuleTester = new RuleTester({
-    parserOptions: {
-        ecmaVersion: 13,
+const esRuleTester = new RuleTester({
+    languageOptions: {
+        parserOptions: {
+            ecmaVersion: 13,
+        }
     }
 });
-es5RuleTester.run("logical-expression-complexity", logicalExpressionComplexityRule, {
+esRuleTester.run("logical-expression-complexity", logicalExpressionComplexityRule, {
     valid: [
         `let a, b, c; let res = a && b && c;`,
         `let a, b; let res = a ?? b;`,
@@ -30,6 +32,9 @@ es5RuleTester.run("logical-expression-complexity", logicalExpressionComplexityRu
         }, {
             code: `let a, b, c, d, e, f; let res = (a && b && c) ? (d || e || f) : (g && h || i);`,
             options: [{ includeTernary: false }]
+        }, {
+            code: `let a, b, c, d, e, f, g, h; let res = (a && b || c && d) || e && f && g && h`,
+            options: [{ maxHeight: 0, maxTerms: 0 }]
         }
     ],
     invalid: [{

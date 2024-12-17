@@ -5,6 +5,7 @@ import type {
     ConditionalExpression,
     Expression,
     LogicalExpression,
+    PrivateIdentifier,
     UnaryExpression
 } from "estree";
 
@@ -106,11 +107,16 @@ function create(context: Rule.RuleContext): Rule.RuleListener {
      * Calculates the height of a tree (distance from root to deepest found leaf node) counting only logical
      * expressions, binary expressions and conditional expressions as nodes
      *
+     * type PrivateIdentifier is included here because for a BinaryExpression, node.left can be a PrivateIdentifier.
+     * In practice, this will never happen. The only time node.left is a PrivateIdentifier is in the following type
+     * of expression `#myField in myObject`, i.e. if the BinaryExpression's operator is "in". This rule doesn't
+     * support the in operator, so ignore this
+     *
      * @param node a node for a logical, binary, or conditional expression
      * @returns height of the tree
      */
-    function calculateHeight(node: Expression): number {
-        if (node === null || node === undefined) {
+    function calculateHeight(node: Expression | PrivateIdentifier): number {
+        if (node === null || node === undefined || node.type === "PrivateIdentifier") {
             return -1;
         }
         if (node.range) {
@@ -139,8 +145,9 @@ function create(context: Rule.RuleContext): Rule.RuleListener {
      * @param node a node for a logical, binary, or conditional expression
      * @returns number of nodes in the tree
      */
-    function countTerms(node: Expression): number {
-        if (node === null || node === undefined) {
+    function countTerms(node: Expression | PrivateIdentifier): number {
+        // see note in calculateHeight re: types
+        if (node === null || node === undefined || node.type === "PrivateIdentifier") {
             return 0;
         }
         if (node.range) {
