@@ -19,7 +19,7 @@
  * @param defaultConfig default properties for the rule
  * @returns properties for the rule
  */
-export function initializeConfig<T>(options: any[], defaultConfig: T): T {
+export function initializeConfig<T>(options: unknown[], defaultConfig: T): T {
     if (options.length === 0) {
         return defaultConfig;
     }

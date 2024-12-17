@@ -4,13 +4,12 @@ import type {
     ImportDeclaration,
     ImportSpecifier,
     PrivateIdentifier,
-    Program,
     PropertyDefinition,
     VariableDeclaration
 } from "estree";
 
-import { objectToString } from "@adashrodEps/lib/rules/util/serialization";
 import { initializeConfig } from "@adashrodEps/lib/rules/util/eslint";
+import { objectToString } from "@adashrodEps/lib/rules/util/serialization";
 
 /**
  * @fileoverview Rule to enforce strict camel case in identifiers
@@ -151,7 +150,7 @@ function create(context: Rule.RuleContext): Rule.RuleListener {
 
     let currentLogLevel: LogLevel;
 
-    function log(requestedLevel: LogLevel, ...args: string[] | (() => string[])[]) {
+    function log(requestedLevel: LogLevel, ...args: string[] | (() => string[])[]): void {
         if (args.length > 0 && isLogLevelEnabled(requestedLevel)) {
             const label = `${context.id} ${requestedLevel.padEnd(5)}`;
             if (typeof args[0] === "function") {
@@ -322,13 +321,13 @@ function create(context: Rule.RuleContext): Rule.RuleListener {
         if (underscorePaddingMatch === null) {
             throw new Error("tokenizedMixedSnakeCase called on string that doesn't match pattern");
         }
-        const leadingUnderscores = underscorePaddingMatch.length >= 2 && underscorePaddingMatch[1] || "";
-        const trailingUnderscores = underscorePaddingMatch.length >= 3 && underscorePaddingMatch[2] || "";
+        const leadingUnderscores = underscorePaddingMatch.length >= 2 ? underscorePaddingMatch[1] : "";
+        const trailingUnderscores = underscorePaddingMatch.length >= 3 ? underscorePaddingMatch[2] : "";
         const tokens = s.split(/_+/).filter(token => token.length);
-        if (leadingUnderscores) {
+        if (leadingUnderscores.length > 0) {
             tokens.unshift(leadingUnderscores);
         }
-        if (trailingUnderscores) {
+        if (trailingUnderscores.length > 0) {
             tokens.push(trailingUnderscores);
         }
         return tokens;
@@ -431,6 +430,7 @@ function create(context: Rule.RuleContext): Rule.RuleListener {
                 if (isAllCaps(token)) {
                     if (token.length > 1 || cfg.allowOneCharWords === "never") {
                         invalidIndexes.push(i);
+                    // todo: put this expression in a function for clarity
                     } else if (cfg.allowOneCharWords === "last" &&
                             // one-char word is last word
                             !(i + 1 === tokens.length ||
@@ -441,7 +441,7 @@ function create(context: Rule.RuleContext): Rule.RuleListener {
                     // token.length === 1 && allowOneCharWords === "always" -> valid token
                 }
             });
-            if (!invalidIndexes.length) {
+            if (invalidIndexes.length === 0) {
                 valid = true;
             }
             invalidIndexes.forEach(index => tokens[index] = capitalize(tokens[index]));
@@ -477,7 +477,7 @@ function create(context: Rule.RuleContext): Rule.RuleListener {
     const reported = new Set<number>();
 
     function buildNodePath(node: Rule.Node): string {
-        const path: any[] = [];
+        const path: unknown[] = [];
         let n = node;
         while (n !== null) {
             path.unshift(n.type);
@@ -508,10 +508,10 @@ function create(context: Rule.RuleContext): Rule.RuleListener {
         let messageId;
         let optionalPrivatePrefix = "";
         if (node.type === "PrivateIdentifier") {
-            messageId = suggestion ? "notCamelCasePrivateWithSuggestion" : "notCamelCasePrivateNoSuggestion";
+            messageId = suggestion !== null ? "notCamelCasePrivateWithSuggestion" : "notCamelCasePrivateNoSuggestion";
             optionalPrivatePrefix = "#";
         } else {
-            messageId = suggestion ? "notCamelCaseWithSuggestion" : "notCamelCaseNoSuggestion";
+            messageId = suggestion !== null ? "notCamelCaseWithSuggestion" : "notCamelCaseNoSuggestion";
         }
 
         log(LogLevel.DEBUG, `reporting ${buildNodePath(nodeWithParent)} "${node.name}"`);
@@ -523,13 +523,13 @@ function create(context: Rule.RuleContext): Rule.RuleListener {
                 suggestion: suggestion ?? "",
                 debug: isLogLevelEnabled(LogLevel.DEBUG) ? ` (${debugMsg} ${buildNodePath(nodeWithParent)})` : ""
             },
-            suggest: suggestion ? [{
+            suggest: suggestion !== null ? [{
                 messageId: "suggestionMessage",
                 data: {
                     name: node.name,
                     suggestion: suggestion ?? ""
                 },
-                fix(fixer: Rule.RuleFixer) {
+                fix(fixer: Rule.RuleFixer): Rule.Fix {
                     return fixer.replaceTextRange(node.range!, optionalPrivatePrefix + suggestion);
                 }
             }] : null
@@ -665,12 +665,12 @@ function create(context: Rule.RuleContext): Rule.RuleListener {
         "TSEnumDeclaration > Identifier": checkSimpleNodeName,
         FunctionDeclaration: checkDeclarations,
         FunctionExpression: checkDeclarations,
-        VariableDeclaration: (node: VariableDeclaration & Rule.NodeParentExtension) =>
-            checkDeclarations(node, node.kind === "const" ? IgnoreSingleWordsIn.FIRST_CLASS_CONSTANT : undefined),
+        VariableDeclaration: (node: VariableDeclaration & Rule.NodeParentExtension): void =>
+            { checkDeclarations(node, node.kind === "const" ? IgnoreSingleWordsIn.FIRST_CLASS_CONSTANT : undefined); },
 
         // ---object literals---
-        "ObjectExpression > Property > Identifier.key": (node: Identifier & Rule.NodeParentExtension) =>
-            checkClassFieldsMethodsAndObjectFieldsMethods(node, IgnoreSingleWordsIn.OBJECT_FIELD),
+        "ObjectExpression > Property > Identifier.key": (node: Identifier & Rule.NodeParentExtension): void =>
+            { checkClassFieldsMethodsAndObjectFieldsMethods(node, IgnoreSingleWordsIn.OBJECT_FIELD); },
         // ---instance functions on classes---
         "MethodDefinition > Identifier.key": checkClassFieldsMethodsAndObjectFieldsMethods,
         // ---TS-only: class instance and static props---
@@ -684,8 +684,8 @@ function create(context: Rule.RuleContext): Rule.RuleListener {
             checkClassFieldsMethodsAndObjectFieldsMethods,
         // ---class props `this.xyz = ...`, `window.abc = ...`---
         "AssignmentExpression > MemberExpression > Identifier.property":
-            (node: Identifier & Rule.NodeParentExtension) =>
-                checkClassFieldsMethodsAndObjectFieldsMethods(node, IgnoreSingleWordsIn.OBJECT_FIELD),
+            (node: Identifier & Rule.NodeParentExtension): void =>
+                { checkClassFieldsMethodsAndObjectFieldsMethods(node, IgnoreSingleWordsIn.OBJECT_FIELD); },
         // TS interface fields
         "TSInterfaceDeclaration > TSInterfaceBody > TSPropertySignature > Identifier.key":
             checkClassFieldsMethodsAndObjectFieldsMethods,
@@ -696,8 +696,8 @@ function create(context: Rule.RuleContext): Rule.RuleListener {
             checkClassFieldsMethodsAndObjectFieldsMethods,
         // TS enum members
         // note to self: astexplorer does not identify TSEnumBody below TSEnumDeclaration
-        "TSEnumDeclaration TSEnumMember > Identifier": (node: Identifier & Rule.NodeParentExtension) =>
-            checkClassFieldsMethodsAndObjectFieldsMethods(node, IgnoreSingleWordsIn.ENUM_MEMBER),
+        "TSEnumDeclaration TSEnumMember > Identifier": (node: Identifier & Rule.NodeParentExtension): void =>
+            { checkClassFieldsMethodsAndObjectFieldsMethods(node, IgnoreSingleWordsIn.ENUM_MEMBER); },
 
         ImportDeclaration: checkImportDeclarations,
 

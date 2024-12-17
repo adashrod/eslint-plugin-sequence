@@ -182,7 +182,7 @@ function create(context: Rule.RuleContext): Rule.RuleListener {
                     },
                     fix(fixer: Rule.RuleFixer) {
                         const specifiersHaveComments = importSpecifiers.some(specifier =>
-                            sourceCode.getCommentsBefore(specifier).length ||
+                            (sourceCode.getCommentsBefore(specifier).length > 0) ||
                                 sourceCode.getCommentsAfter(specifier).length);
                         if (specifiersHaveComments) {
                             return cfg.sortSpecifiersWithComments ?

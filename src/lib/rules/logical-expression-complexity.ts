@@ -170,7 +170,7 @@ function create(context: Rule.RuleContext): Rule.RuleListener {
     }
 
     return {
-        [selector]: (node: BinaryExpression | ConditionalExpression | LogicalExpression | UnaryExpression) => {
+        [selector]: (node: BinaryExpression | ConditionalExpression | LogicalExpression | UnaryExpression): void => {
             if (node.type === "UnaryExpression" && node.operator !== "!") {
                 return;
             }

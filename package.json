@@ -7,19 +7,24 @@
         "module-alias": "^2.2.3"
     },
     "devDependencies": {
+        "@eslint/compat": "^1.2.4",
         "@eslint/js": "^9.16.0",
         "@types/eslint": "^9.6.1",
         "@types/module-alias": "^2.0.4",
         "@types/node": "^22.10.2",
         "@typescript-eslint/parser": "^8.18.0",
         "@typescript-eslint/rule-tester": "^8.18.0",
+        "eslint": "^9.17.0",
+        "eslint-plugin-import": "^2.31.0",
+        "eslint-plugin-sequence": "^0.7.0",
         "ts-node": "^10.9.2",
         "typescript": "^5.7.2",
         "typescript-eslint": "^8.18.0"
     },
     "scripts": {
         "test": "ts-node src/tests/test-all.ts",
-        "build": "rm -rf dist; tsc; ts-node src/build.ts"
+        "build": "rm -rf dist; tsc; ts-node src/build.ts",
+        "lint": "npx eslint src"
     },
     "type": "commonjs",
     "repository": {

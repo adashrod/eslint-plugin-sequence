@@ -103,12 +103,10 @@ function create(context: Rule.RuleContext): Rule.RuleListener {
      * @returns path name, e.g. the "@adashrodEps/model/Box" in `import Box from "@adashrodEps/model/Box"`
      */
     function getPathName(node: ImportDeclaration): string {
-        const v = node.source.value;
-        const t = typeof v;
-        if (t !== "string") {
-            throw new Error(`source.value property in ImportDeclaration is not a string (${v}: ${t}`);
+        if (typeof node.source.value === "string") {
+            return node.source.value;
         }
-        return node.source.value as string;
+        throw new Error(`source.value property in ImportDeclaration is not a string (${node.source.value}: ${typeof node.source.value}`);
     }
 
     /**
@@ -135,7 +133,7 @@ function create(context: Rule.RuleContext): Rule.RuleListener {
         }
         const absoluteNumberLinesBetween = right.loc.start.line - left.loc.end.line;
         const commentsBetween = sourceCode.getCommentsAfter(left);
-        if (!commentsBetween.length) {
+        if (commentsBetween.length === 0) {
             return absoluteNumberLinesBetween <= 1;
         }
         if (commentsBetween.some(c => !c.loc)) {
@@ -157,12 +155,12 @@ function create(context: Rule.RuleContext): Rule.RuleListener {
      * @returns array of all surrounding ImportDeclaration nodes
      */
     function getGroupOfAdjacentImports(node: ImportDeclaration & Rule.NodeParentExtension): ImportDeclaration[] {
-        let allImports = (node.parent as Program as Ast.Program)
+        const allImports = (node.parent as Program as Ast.Program)
             .body.filter((aBodyNode) => aBodyNode.type === "ImportDeclaration") as ImportDeclaration[];
         if (!cfg.allowSeparateGroups) {
             return allImports.slice();
         }
-        let nodeIndex = allImports.indexOf(node);
+        const nodeIndex = allImports.indexOf(node);
         let firstIndex = 0, lastIndex = allImports.length - 1;
         for (let i = nodeIndex; i > 0; i--) {
             if (!nodesAreAdjacent(allImports[i - 1], allImports[i])) {
@@ -192,7 +190,7 @@ function create(context: Rule.RuleContext): Rule.RuleListener {
      * @param declarationB an ImportDeclaration
      * @returns comparator result
      */
-    function importDeclarationComparator(declarationA: ImportDeclaration, declarationB: ImportDeclaration) {
+    function importDeclarationComparator(declarationA: ImportDeclaration, declarationB: ImportDeclaration): number {
         if (cfg.sortSideEffectsFirst) {
             const leftIsSideEffectsModule = declarationA.specifiers.length === 0;
             const rightIsSideEffectsModule = declarationB.specifiers.length === 0;
@@ -252,21 +250,23 @@ function create(context: Rule.RuleContext): Rule.RuleListener {
     }
 
     return {
-        ImportDeclaration: (node: ImportDeclaration & Rule.NodeParentExtension) => {
+        ImportDeclaration: (node: ImportDeclaration & Rule.NodeParentExtension): void => {
             if (previousDeclaration && cfg.allowSeparateGroups && !nodesAreAdjacent(previousDeclaration, node)) {
                 // reset for next group
                 previousDeclaration = null;
             }
 
-            if (previousDeclaration && getPathName(previousDeclaration) && getPathName(node) &&
+            if (previousDeclaration !== null &&
+                    typeof getPathName(previousDeclaration) === "string" &&
+                    typeof getPathName(node) === "string" &&
                     importDeclarationComparator(previousDeclaration, node) > 0) {
-                let importGroup = getGroupOfAdjacentImports(node);
+                const importGroup = getGroupOfAdjacentImports(node);
                 let messageId, nameA, nameB, typeStyle = "";
                 if (shouldReportFullImport(node, previousDeclaration)) {
                     messageId = "sortTypeImports"
                     nameA = sourceCode.getText(node);
                     nameB = sourceCode.getText(previousDeclaration);
-                    typeStyle = cfg.sortTypeImportsFirst ? "before" : "after";
+                    typeStyle = cfg.sortTypeImportsFirst === true ? "before" : "after";
                 } else if (shouldReportSideEffectsModuleMessage(node, previousDeclaration)) {
                     messageId = "sortSideEffectsFirst";
                     nameA = sourceCode.getText(node);
@@ -300,7 +300,7 @@ function create(context: Rule.RuleContext): Rule.RuleListener {
                                     throw new Error("range property undefined in Comment; can't fix");
                                 }
                                 return sourceCode.getText().slice(declaration.range![0],
-                                    commentsAfter.length ?
+                                    (commentsAfter.length > 0) ?
                                         commentsAfter[commentsAfter.length - 1].range![1] :
                                         declaration.range![1]);
                             })

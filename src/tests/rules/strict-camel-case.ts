@@ -1,10 +1,10 @@
 import { parse } from "@typescript-eslint/parser";
 import { RuleTester as TsEsLintRuleTester } from "@typescript-eslint/rule-tester";
-import { ESLintUtils as EsLintUtils } from '@typescript-eslint/utils';
+import { ESLintUtils as EsLintUtils } from "@typescript-eslint/utils";
 import { RuleTester as EsLintRuleTester } from "eslint";
+import EventEmitter from "events";
 
 import strictCamelCaseRule from "@adashrodEps/lib/rules/strict-camel-case";
-import EventEmitter from "events";
 
 const es13RuleTester = new EsLintRuleTester({
     languageOptions: {
@@ -550,14 +550,14 @@ const theRule = createRule({
 });
 
 const ruleTesterEventEmitter = new EventEmitter();
-TsEsLintRuleTester.afterAll = () => {};
-TsEsLintRuleTester.it = function(text, method) {
+TsEsLintRuleTester.afterAll = (): void => {};
+TsEsLintRuleTester.it = function(text, method): void {
     ruleTesterEventEmitter.emit("it", text, method);
-    return method.call(this);
+    method.call(this);
 };
-TsEsLintRuleTester.describe = function(text, method) {
+TsEsLintRuleTester.describe = function(text, method): void {
     ruleTesterEventEmitter.emit("describe", text, method);
-    return method.call(this);
+    method.call(this);
 };
 // the suggestions in these test cases can't be verified using EsLintRuleTester because it parses the suggested output
 // and fails the test case if there are any errors, which happens when renaming identifiers and only applying one

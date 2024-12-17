@@ -1,8 +1,8 @@
 const tab = "    ";
 
-type CacheTuple = [any, string];
+type CacheTuple = [unknown, string];
 
-function helper(obj: any, indent: string, cache: CacheTuple[], path: string): string {
+function helper(obj: unknown, indent: string, cache: CacheTuple[], path: string): string {
     const found = cache.find(cacheItem => cacheItem[0] === obj);
     if (found) {
         return `<circular> (${found[1]})`;
@@ -85,6 +85,6 @@ function helper(obj: any, indent: string, cache: CacheTuple[], path: string): st
  * @param object an object to serialize as a JSON-like string
  * @returns a JSON-like string
  */
-export function objectToString(object: any): string {
+export function objectToString(object: unknown): string {
     return helper(object, "", [], "<root>");
 }
