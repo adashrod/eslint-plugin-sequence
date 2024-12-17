@@ -1,11 +1,13 @@
+import { parse } from "@typescript-eslint/parser";
 import { RuleTester } from "eslint";
 
 import orderedImportMembersRule from "@adashrodEps/lib/rules/ordered-import-members";
 
 const esRuleTester = new RuleTester({
-    parserOptions: {
-        ecmaVersion: 6,
-        sourceType: "module",
+    languageOptions: {
+        parserOptions: {
+            ecmaVersion: 6
+        }
     }
 });
 
@@ -116,7 +118,9 @@ esRuleTester.run("ordered-import-members", orderedImportMembersRule, {
 });
 
 const tsRuleTester = new RuleTester({
-    parser: require.resolve('@typescript-eslint/parser')
+    languageOptions: {
+        parser: { parse }
+    }
 });
 
 tsRuleTester.run("ordered-import-members", orderedImportMembersRule, {

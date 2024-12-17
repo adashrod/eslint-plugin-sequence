@@ -1,15 +1,21 @@
 import type { Rule } from "eslint";
 import type {
     BinaryExpression,
+    BinaryOperator,
     ConditionalExpression,
     Expression,
     LogicalExpression,
+    PrivateIdentifier,
     UnaryExpression
 } from "estree";
 
 import { initializeConfig } from "@adashrodEps/lib/rules/util/eslint";
 
-enum BinaryOperator {
+// exists just to add a bit of type safety in the schema: the code uses BinaryOperator from estree, but schema
+// validation will ensure that only this subset is used in config
+// using `type MyOpType = Extract<BinaryOperator, ...>` doesn't work because then TS complains about values not in this
+// subset not being assignable to this
+enum BinaryOperatorAsEnum {
     EQUALS = "==",
     STRICT_EQUALS = "===",
     NOT_EQUAL = "!=",
@@ -63,14 +69,14 @@ const meta: Rule.RuleMetaData = {
                 type: "array",
                 items: {
                     enum: [
-                        BinaryOperator.EQUALS,
-                        BinaryOperator.STRICT_EQUALS,
-                        BinaryOperator.NOT_EQUAL,
-                        BinaryOperator.STRICT_NOT_EQUAL,
-                        BinaryOperator.LESS_THAN,
-                        BinaryOperator.LESS_THAN_EQUAL,
-                        BinaryOperator.GREATER_THAN,
-                        BinaryOperator.GREATER_THAN_EQUAL
+                        BinaryOperatorAsEnum.EQUALS,
+                        BinaryOperatorAsEnum.STRICT_EQUALS,
+                        BinaryOperatorAsEnum.NOT_EQUAL,
+                        BinaryOperatorAsEnum.STRICT_NOT_EQUAL,
+                        BinaryOperatorAsEnum.LESS_THAN,
+                        BinaryOperatorAsEnum.LESS_THAN_EQUAL,
+                        BinaryOperatorAsEnum.GREATER_THAN,
+                        BinaryOperatorAsEnum.GREATER_THAN_EQUAL
                     ]
                 },
                 minItems: 0,
@@ -101,18 +107,23 @@ function create(context: Rule.RuleContext): Rule.RuleListener {
      * Calculates the height of a tree (distance from root to deepest found leaf node) counting only logical
      * expressions, binary expressions and conditional expressions as nodes
      *
+     * type PrivateIdentifier is included here because for a BinaryExpression, node.left can be a PrivateIdentifier.
+     * In practice, this will never happen. The only time node.left is a PrivateIdentifier is in the following type
+     * of expression `#myField in myObject`, i.e. if the BinaryExpression's operator is "in". This rule doesn't
+     * support the in operator, so ignore this
+     *
      * @param node a node for a logical, binary, or conditional expression
      * @returns height of the tree
      */
-    function calculateHeight(node: Expression): number {
-        if (node === null || node === undefined) {
+    function calculateHeight(node: Expression | PrivateIdentifier): number {
+        if (node === null || node === undefined || node.type === "PrivateIdentifier") {
             return -1;
         }
         if (node.range) {
             heightObserved.add(node.range[0]);
         }
         if (node.type === "LogicalExpression" ||
-                node.type === "BinaryExpression" && cfg.binaryOperators.includes(node.operator as BinaryOperator)) {
+                node.type === "BinaryExpression" && cfg.binaryOperators.includes(node.operator)) {
             const leftHeight = calculateHeight(node.left);
             const rightHeight = calculateHeight(node.right);
             return Math.max(leftHeight, rightHeight) + 1;
@@ -134,15 +145,16 @@ function create(context: Rule.RuleContext): Rule.RuleListener {
      * @param node a node for a logical, binary, or conditional expression
      * @returns number of nodes in the tree
      */
-    function countTerms(node: Expression): number {
-        if (node === null || node === undefined) {
+    function countTerms(node: Expression | PrivateIdentifier): number {
+        // see note in calculateHeight re: types
+        if (node === null || node === undefined || node.type === "PrivateIdentifier") {
             return 0;
         }
         if (node.range) {
             countObserved.add(node.range[0]);
         }
         if (node.type === "LogicalExpression" ||
-                node.type === "BinaryExpression" && cfg.binaryOperators.includes(node.operator as BinaryOperator)) {
+                node.type === "BinaryExpression" && cfg.binaryOperators.includes(node.operator)) {
             return countTerms(node.left) + countTerms(node.right);
         } else if (node.type === "UnaryExpression" && node.operator === "!") {
             return countTerms(node.argument);
@@ -162,7 +174,7 @@ function create(context: Rule.RuleContext): Rule.RuleListener {
             if (node.type === "UnaryExpression" && node.operator !== "!") {
                 return;
             }
-            if (node.type === "BinaryExpression" && !cfg.binaryOperators.includes(node.operator as BinaryOperator)) {
+            if (node.type === "BinaryExpression" && !cfg.binaryOperators.includes(node.operator)) {
                 return;
             }
             if (cfg.maxHeight > 0 && node.range && !heightObserved.has(node.range[0])) {

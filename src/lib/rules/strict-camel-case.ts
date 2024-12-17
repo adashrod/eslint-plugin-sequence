@@ -114,12 +114,13 @@ const meta: Rule.RuleMetaData = {
         notCamelCaseWithSuggestion:
             `Identifier "{{name}}" is not in strict camel case, should be "{{suggestion}}".{{debug}}`,
         notCamelCasePrivateWithSuggestion:
-            `"Private member #{{name}}" is not in strict camel case, should be "#{{suggestion}}".{{debug}}`,
+            `Private member "#{{name}}" is not in strict camel case, should be "#{{suggestion}}".{{debug}}`,
         notCamelCaseNoSuggestion:
             `Identifier "{{name}}" is not in strict camel case, no suggestion possible for 1-char words.{{debug}}`,
         notCamelCasePrivateNoSuggestion:
-            `"Private member #{{name}}" is not in strict camel case, no suggestion possible for 1-char words.` +
-            `{{debug}}`
+            `Private member "#{{name}}" is not in strict camel case, no suggestion possible for 1-char words.` +
+            `{{debug}}`,
+        suggestionMessage: `Replace "{{name}}" with "{{suggestion}}"`
     }
 };
 
@@ -152,7 +153,7 @@ function create(context: Rule.RuleContext): Rule.RuleListener {
 
     function log(requestedLevel: LogLevel, ...args: string[] | (() => string[])[]) {
         if (args.length > 0 && isLogLevelEnabled(requestedLevel)) {
-            const label = context.id + requestedLevel.padEnd(5);
+            const label = `${context.id} ${requestedLevel.padEnd(5)}`;
             if (typeof args[0] === "function") {
                 console.log(label, ...args[0]());
             } else {
@@ -523,44 +524,16 @@ function create(context: Rule.RuleContext): Rule.RuleListener {
                 debug: isLogLevelEnabled(LogLevel.DEBUG) ? ` (${debugMsg} ${buildNodePath(nodeWithParent)})` : ""
             },
             suggest: suggestion ? [{
-                desc: `Replace "${node.name}" with "${suggestion}"`,
+                messageId: "suggestionMessage",
+                data: {
+                    name: node.name,
+                    suggestion: suggestion ?? ""
+                },
                 fix(fixer: Rule.RuleFixer) {
                     return fixer.replaceTextRange(node.range!, optionalPrivatePrefix + suggestion);
                 }
             }] : null
         });
-    }
-
-    function checkGlobals(program: Program): void {
-        // compatibility with EsLint 7.x, 8.x and upcoming 9
-        const scope = typeof sourceCode.getScope === "function" ? sourceCode.getScope(program) : context.getScope();
-
-        for (const variable of scope.variables) {
-            const response = checkValidityAndGetSuggestion(variable.name);
-            // these are global variables. built-in global vars have no identifiers or defs
-            // in ecmaVersion <= 5, this catches implicit globals `var xyz = 5` outside of any function scope
-            // >= 6 scope.variables is only built-ins
-            if (!variable.identifiers.length || response.valid) {
-                log(LogLevel.TRACE, `Program: PASS variable.name=${variable.name}`);
-                continue;
-            }
-            for (const reference of variable.references) {
-                log(LogLevel.TRACE, () => [`Program: reporting reference ${variable.name}`, objectToString(reference)]);
-                report(reference.identifier, response.suggestion, "Program: scope.variables[].references[]");
-            }
-        }
-
-        for (const reference of scope.through) {
-            const identifier = reference.identifier;
-            const response = checkValidityAndGetSuggestion(identifier.name);
-            if (response.valid) {
-                continue;
-            }
-            log(LogLevel.TRACE, () => [
-                `Program: reporting through reference reference.identifier.name=${identifier.name}`,
-                objectToString(reference)]);
-            report(identifier, response.suggestion, "Program: scope.through[].identifier");
-        }
     }
 
     function checkDeclarations(node: Rule.Node, singleWordExemptionType?: IgnoreSingleWordsIn): void {
@@ -581,7 +554,7 @@ function create(context: Rule.RuleContext): Rule.RuleListener {
 
             // references to vars after declaration
             for (const reference of variable.references) {
-                if (reference.init) { // boolean
+                if (reference.init) {
                     // this is a reference to the var initialization, but the name was already checked at the top
                     // of the outer loop, so skip
                     continue;
@@ -624,6 +597,14 @@ function create(context: Rule.RuleContext): Rule.RuleListener {
     }
 
     function checkImportDeclarations(node: ImportDeclaration & Rule.NodeParentExtension): void {
+        function badlyAliasedImport(identifier: Identifier & Rule.NodeParentExtension): boolean {
+            const idName = identifier.name;
+            const importSpecifierParent = identifier.parent as ImportSpecifier;
+            if (importSpecifierParent.imported.type === "Identifier") {
+                return idName !== importSpecifierParent.imported.name;
+            }
+            return false;
+        }
         if (!cfg.ignoreImports) {
             // compatibility with EsLint 7.x, 8.x and upcoming 9
             for (const variable of (typeof sourceCode.getDeclaredVariables === "function" ?
@@ -643,7 +624,7 @@ function create(context: Rule.RuleContext): Rule.RuleListener {
                         objectToString(identifier)
                     ]);
                     report(identifier, response.suggestion, "ImportDefaultSpec/ImportNamespaceSpecifier");
-                } else if (identifier.name !== (identifier.parent as ImportSpecifier).imported.name) {
+                } else if (badlyAliasedImport(identifier)) {
                     log(LogLevel.TRACE, () => [`ImportDeclaration reporting named import ${variable.name}`,
                         objectToString(identifier)]);
                     report(identifier, response.suggestion, "Import");
@@ -664,26 +645,24 @@ function create(context: Rule.RuleContext): Rule.RuleListener {
         }
     }
 
-    function checkExportsAndLabels(node: Identifier & Rule.NodeParentExtension): void {
-        log(LogLevel.DEBUG, `export/label checking ${node.name}`);
+    function checkSimpleNodeName(node: Identifier & Rule.NodeParentExtension): void {
+        log(LogLevel.DEBUG, `export/label/nodeName checking ${node.name}`);
         const response = checkValidityAndGetSuggestion(node.name);
         if (!response.valid) {
-            log(LogLevel.TRACE, () => [`export/label reporting ${node.name}`, objectToString(node)]);
-            report(node, response.suggestion, "export/label/break/continue");
+            log(LogLevel.TRACE, () => [`export/label/nodeName reporting ${node.name}`, objectToString(node)]);
+            report(node, response.suggestion, "export/label/break/continue/nodeName");
         } else {
-            log(LogLevel.TRACE, `export/label: PASS ${node.name}`);
+            log(LogLevel.TRACE, `export/label/nodeName: PASS ${node.name}`);
         }
     }
 
     return {
-        Program: checkGlobals,
-
         ArrowFunctionExpression: checkDeclarations,
         CatchClause: checkDeclarations,
         ClassDeclaration: checkDeclarations,
         ClassExpression: checkDeclarations,
-        TSInterfaceDeclaration: checkDeclarations,
-        TSEnumDeclaration: checkDeclarations,
+        "TSInterfaceDeclaration > Identifier.id": checkSimpleNodeName,
+        "TSEnumDeclaration > Identifier": checkSimpleNodeName,
         FunctionDeclaration: checkDeclarations,
         FunctionExpression: checkDeclarations,
         VariableDeclaration: (node: VariableDeclaration & Rule.NodeParentExtension) =>
@@ -716,16 +695,17 @@ function create(context: Rule.RuleContext): Rule.RuleListener {
         "TSTypeAliasDeclaration > TSTypeLiteral > TSPropertySignature > Identifier.key":
             checkClassFieldsMethodsAndObjectFieldsMethods,
         // TS enum members
-        "TSEnumDeclaration > TSEnumMember > Identifier.id": (node: Identifier & Rule.NodeParentExtension) =>
+        // note to self: astexplorer does not identify TSEnumBody below TSEnumDeclaration
+        "TSEnumDeclaration TSEnumMember > Identifier": (node: Identifier & Rule.NodeParentExtension) =>
             checkClassFieldsMethodsAndObjectFieldsMethods(node, IgnoreSingleWordsIn.ENUM_MEMBER),
 
         ImportDeclaration: checkImportDeclarations,
 
-        "ExportAllDeclaration > Identifier.exported": checkExportsAndLabels,
-        "ExportSpecifier > Identifier.exported": checkExportsAndLabels,
-        "LabeledStatement > Identifier.label": checkExportsAndLabels,
-        "BreakStatement > Identifier.label": checkExportsAndLabels,
-        "ContinueStatement > Identifier.label": checkExportsAndLabels,
+        "ExportAllDeclaration > Identifier.exported": checkSimpleNodeName,
+        "ExportSpecifier > Identifier.exported": checkSimpleNodeName,
+        "LabeledStatement > Identifier.label": checkSimpleNodeName,
+        "BreakStatement > Identifier.label": checkSimpleNodeName,
+        "ContinueStatement > Identifier.label": checkSimpleNodeName,
     };
 }
 
