@@ -27,10 +27,11 @@ export function findPunctuatorAfter(tokens: Ast.Token[], startPos: number, punct
  * @returns found token or null if not found
  */
 export function findPunctuatorBetween(
-        tokens: Ast.Token[],
-        startPos: number,
-        endPos: number,
-        punctuator: string): Ast.Token | null {
+    tokens: Ast.Token[],
+    startPos: number,
+    endPos: number,
+    punctuator: string
+): Ast.Token | null {
     return tokens.find(token =>
         token.type === "Punctuator" &&
         token.value === punctuator &&

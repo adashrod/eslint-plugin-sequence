@@ -8,7 +8,7 @@ type Config = {
     allowSeparateGroups: boolean;
     sortSideEffectsFirst: boolean;
     sortTypeImportsFirst: boolean | undefined;
-}
+};
 
 const DEFAULT_PROPERTIES: Config = {
     ignoreCase: false,
@@ -172,7 +172,7 @@ function create(context: Rule.RuleContext): Rule.RuleListener {
             if (!nodesAreAdjacent(allImports[i], allImports[i + 1])) {
                 lastIndex = i;
                 break;
-            }
+            } 
         }
         return allImports.slice(firstIndex, lastIndex + 1);
     }
@@ -194,7 +194,7 @@ function create(context: Rule.RuleContext): Rule.RuleListener {
         if (cfg.sortSideEffectsFirst) {
             const leftIsSideEffectsModule = declarationA.specifiers.length === 0;
             const rightIsSideEffectsModule = declarationB.specifiers.length === 0;
-            if (leftIsSideEffectsModule != rightIsSideEffectsModule) {
+            if (leftIsSideEffectsModule !== rightIsSideEffectsModule) {
                 return leftIsSideEffectsModule ? -1 : 1;
             }
         }
@@ -242,8 +242,9 @@ function create(context: Rule.RuleContext): Rule.RuleListener {
      * @returns true if the side effects module error should be shown
      */
     function shouldReportSideEffectsModuleMessage(
-            declarationA: ImportDeclaration,
-            declarationB: ImportDeclaration): boolean {
+        declarationA: ImportDeclaration,
+        declarationB: ImportDeclaration
+    ): boolean {
         const leftIsSideEffectsModule = declarationA.specifiers.length === 0;
         const rightIsSideEffectsModule = declarationB.specifiers.length === 0;
         return cfg.sortSideEffectsFirst && leftIsSideEffectsModule !== rightIsSideEffectsModule;
@@ -263,7 +264,7 @@ function create(context: Rule.RuleContext): Rule.RuleListener {
                 const importGroup = getGroupOfAdjacentImports(node);
                 let messageId, nameA, nameB, typeStyle = "";
                 if (shouldReportFullImport(node, previousDeclaration)) {
-                    messageId = "sortTypeImports"
+                    messageId = "sortTypeImports";
                     nameA = sourceCode.getText(node);
                     nameB = sourceCode.getText(previousDeclaration);
                     typeStyle = cfg.sortTypeImportsFirst === true ? "before" : "after";

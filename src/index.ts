@@ -1,10 +1,14 @@
 import { addAlias } from "module-alias";
+
+/* global __dirname */
+
 /*
 not using _moduleAliases in package.json because:
 - we need different aliases for unit tests and runtime
 - the value in package.json for this package doens't get picked up by apps importing this package
 __dirname == <root>/src
  */
+
 addAlias("@adashrodEps", __dirname);
 
 import logicalExpressionComplexity from "@adashrodEps/lib/rules/logical-expression-complexity";

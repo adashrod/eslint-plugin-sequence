@@ -23,6 +23,12 @@ es13RuleTester.run("strict-camel-case", strictCamelCaseRule, {
             options: [{ allowOneCharWords: "always" }]
         }, {
             code: `const getX = () => {};`,
+            options: [{ allowOneCharWords: "always" }]
+        }, {
+            code: `function maybeAFunction() {};`,
+            options: [{ allowOneCharWords: "always" }]
+        }, {
+            code: `const getX = () => {};`,
             options: [{ allowOneCharWords: "last" }]
         }, {
             code: `class API {}`,
@@ -92,7 +98,7 @@ es13RuleTester.run("strict-camel-case", strictCamelCaseRule, {
         }
     ],
     invalid: [{
-        code:  `const obj = {}; obj.VERSION = "1.0";`,
+        code: `const obj = {}; obj.VERSION = "1.0";`,
         errors: [{
             messageId: "notCamelCaseWithSuggestion",
             suggestions: [{
@@ -117,6 +123,30 @@ es13RuleTester.run("strict-camel-case", strictCamelCaseRule, {
     }, {
         code: `const AFunction = () => {};`,
         options: [{ allowOneCharWords: "last" }],
+        errors: [{
+            messageId: "notCamelCaseNoSuggestion"
+        }]
+    }, {
+        code: `function maybeAFunction() {};`,
+        options: [{ allowOneCharWords: "last" }],
+        errors: [{
+            messageId: "notCamelCaseNoSuggestion"
+        }]
+    }, {
+        code: `class IDatabase {};`,
+        options: [{ allowOneCharWords: "never" }],
+        errors: [{
+            messageId: "notCamelCaseNoSuggestion"
+        }]
+    }, {
+        code: `function maybeAFunction() {};`,
+        options: [{ allowOneCharWords: "never" }],
+        errors: [{
+            messageId: "notCamelCaseNoSuggestion"
+        }]
+    }, {
+        code: `function getX() {};`,
+        options: [{ allowOneCharWords: "never" }],
         errors: [{
             messageId: "notCamelCaseNoSuggestion"
         }]
@@ -532,7 +562,7 @@ tsRuleTester.run("strict-camel-case", strictCamelCaseRule, {
 
 // without migrating all rule source code from the RuleModule types in eslint core to that of @typescript-eslint, the
 // following code rebuilds the rule as a @typescript-eslint RuleModule to use with TSESL's RuleTester
-type SccMessageIds = 
+type SccMessageIds =
     "notCamelCaseWithSuggestion" |
     "notCamelCasePrivateWithSuggestion" |
     "notCamelCaseNoSuggestion" |
@@ -564,7 +594,7 @@ TsEsLintRuleTester.describe = function(text, method): void {
 // suggestion at a time. Fortunately TsEsLintRuleTester isn't as strict
 // see https://github.com/eslint/eslint/pull/16639
 const tsEsRuleTester = new TsEsLintRuleTester();
-tsEsRuleTester.run("strict-camel-case", theRule , {
+tsEsRuleTester.run("strict-camel-case", theRule, {
     valid: [],
     invalid: [{
         code: `myXYZLabel1:
@@ -620,7 +650,7 @@ for (let i = 0; i < 5; i++) {
 }`,
         errors: [{
             messageId: "notCamelCaseWithSuggestion",
-            suggestions:[{
+            suggestions: [{
                 messageId: "suggestionMessage",
                 output: `label2:
 for (let i = 0; i < 5; i++) {
@@ -642,4 +672,4 @@ for (let i = 0; i < 5; i++) {
             }]
         }]
     }]
-})
+});

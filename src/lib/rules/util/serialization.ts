@@ -30,7 +30,7 @@ function helper(obj: unknown, indent: string, cache: CacheTuple[], path: string)
             const rec = helper(element, indent + tab, cache, `${path}[${i}]`);
             builder += `${indent + tab}${rec}`;
             if (i + 1 < obj.length) {
-                builder += ","
+                builder += ",";
             }
             builder += "\n";
         }

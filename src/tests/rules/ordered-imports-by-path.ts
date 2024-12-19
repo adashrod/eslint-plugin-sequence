@@ -4,7 +4,7 @@ import { RuleTester } from "eslint";
 import orderedImportsByPathRule from "@adashrodEps/lib/rules/ordered-imports-by-path";
 
 const esRuleTester = new RuleTester({
-    languageOptions:{
+    languageOptions: {
         parserOptions: {
             ecmaVersion: 6
         }
@@ -167,7 +167,7 @@ esRuleTester.run("ordered-imports-by-path", orderedImportsByPathRule, {
 });
 
 const tsRuleTester = new RuleTester({
-    languageOptions: {   
+    languageOptions: {
         parser: { parse }
     }
 });

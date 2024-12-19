@@ -11,6 +11,8 @@ import type {
 import { initializeConfig } from "@adashrodEps/lib/rules/util/eslint";
 import { objectToString } from "@adashrodEps/lib/rules/util/serialization";
 
+/* global console */
+
 /**
  * @fileoverview Rule to enforce strict camel case in identifiers
  * @author Aaron Rodriguez
@@ -36,7 +38,7 @@ type Config = {
     allowOneCharWords: AllowOneCharWords;
     ignoreSingleWords: boolean;
     ignoreSingleWordsIn: IgnoreSingleWordsIn[]
-}
+};
 
 const DEFAULT_PROPERTIES: Config = {
     ignoreProperties: false,
@@ -171,7 +173,7 @@ function create(context: Rule.RuleContext): Rule.RuleListener {
      * @param level log level, see LEVELS
      */
     function setLogLevel(level: LogLevel): void {
-        currentLogLevel = level
+        currentLogLevel = level;
     }
     setLogLevel(LogLevel.OFF);
 
@@ -355,6 +357,16 @@ function create(context: Rule.RuleContext): Rule.RuleListener {
         return mixedSnakeCasePattern.test(s);
     }
 
+    function isDisallowedOneCharToken(index: number, tokens: string[]): boolean {
+        const is1CharToken = tokens[index].length === 1;
+        const isLastToken =
+            // one-char word is last word
+            index + 1 === tokens.length ||
+            // one-char word is last word before trailing underscores
+            (index + 2 === tokens.length && tokens[tokens.length - 1].match(/^_+$/) !== null);
+        return is1CharToken && cfg.allowOneCharWords === "last" && !isLastToken;
+    }
+
     /**
      * Checks that the given string is in strict camel case. If it is, the return value will contain the property
      * `valid: true`. If it's not in strict camel case, valid will be false. If valid is false, the result might
@@ -423,19 +435,17 @@ function create(context: Rule.RuleContext): Rule.RuleListener {
                 }
             }
         } else {
-            log(LogLevel.TRACE, `tokenizing "${s}" as camel case`)
+            log(LogLevel.TRACE, `tokenizing "${s}" as camel case`);
             tokens = tokenizeInvalidCamelCase(s);
             const invalidIndexes: number[] = [];
             tokens.forEach((token, i) => {
                 if (isAllCaps(token)) {
-                    if (token.length > 1 || cfg.allowOneCharWords === "never") {
-                        invalidIndexes.push(i);
-                    // todo: put this expression in a function for clarity
-                    } else if (cfg.allowOneCharWords === "last" &&
-                            // one-char word is last word
-                            !(i + 1 === tokens.length ||
-                                // one-char word is last word before trailing underscores
-                                (i + 2 === tokens.length && tokens[tokens.length - 1].match(/^_+$/)))) {
+                    const isMultiCharToken = token.length > 1;
+                    if (
+                        isMultiCharToken ||
+                        cfg.allowOneCharWords === "never" ||
+                        isDisallowedOneCharToken(i, tokens)
+                    ) {
                         invalidIndexes.push(i);
                     }
                     // token.length === 1 && allowOneCharWords === "always" -> valid token
@@ -450,7 +460,7 @@ function create(context: Rule.RuleContext): Rule.RuleListener {
         return {
             suggestion: ![s, ""].includes(joined)  ? joined : null,
             valid
-        }
+        };
     }
 
     /**
@@ -539,8 +549,9 @@ function create(context: Rule.RuleContext): Rule.RuleListener {
     function checkDeclarations(node: Rule.Node, singleWordExemptionType?: IgnoreSingleWordsIn): void {
         // compatibility with EsLint 7.x, 8.x and upcoming 9
         for (const variable of (typeof sourceCode.getDeclaredVariables === "function" ?
-                sourceCode.getDeclaredVariables(node) :
-                context.getDeclaredVariables(node))) { // funcName+params, mult var decl in one stmt
+            sourceCode.getDeclaredVariables(node) :
+            context.getDeclaredVariables(node))
+        ) { // funcName+params, mult var decl in one stmt
             log(LogLevel.DEBUG, `*Declaration checking variable.name=${variable.name}`);
             const response = checkValidityAndGetSuggestion(variable.name,
                 cfg.ignoreSingleWordsIn.includes(singleWordExemptionType as IgnoreSingleWordsIn));
@@ -569,8 +580,9 @@ function create(context: Rule.RuleContext): Rule.RuleListener {
     }
 
     function checkClassFieldsMethodsAndObjectFieldsMethods(
-            node: (Identifier | PrivateIdentifier) & Rule.NodeParentExtension,
-            singleWordExemptionType?: IgnoreSingleWordsIn): void {
+        node: (Identifier | PrivateIdentifier) & Rule.NodeParentExtension,
+        singleWordExemptionType?: IgnoreSingleWordsIn
+    ): void {
         if (isExemptAssignment(node)) {
             log(LogLevel.TRACE, `skipping object property in RHS of assignment expression`);
             return;
@@ -608,8 +620,9 @@ function create(context: Rule.RuleContext): Rule.RuleListener {
         if (!cfg.ignoreImports) {
             // compatibility with EsLint 7.x, 8.x and upcoming 9
             for (const variable of (typeof sourceCode.getDeclaredVariables === "function" ?
-                    sourceCode.getDeclaredVariables(node) :
-                    context.getDeclaredVariables(node))) {
+                sourceCode.getDeclaredVariables(node) :
+                context.getDeclaredVariables(node))
+            ) {
                 log(LogLevel.DEBUG, `ImportDeclaration checking ${variable.name}`);
                 const response = checkValidityAndGetSuggestion(variable.name);
                 if (response.valid) {
@@ -665,12 +678,14 @@ function create(context: Rule.RuleContext): Rule.RuleListener {
         "TSEnumDeclaration > Identifier": checkSimpleNodeName,
         FunctionDeclaration: checkDeclarations,
         FunctionExpression: checkDeclarations,
-        VariableDeclaration: (node: VariableDeclaration & Rule.NodeParentExtension): void =>
-            { checkDeclarations(node, node.kind === "const" ? IgnoreSingleWordsIn.FIRST_CLASS_CONSTANT : undefined); },
+        VariableDeclaration: (node: VariableDeclaration & Rule.NodeParentExtension): void => {
+            checkDeclarations(node, node.kind === "const" ? IgnoreSingleWordsIn.FIRST_CLASS_CONSTANT : undefined);
+        },
 
         // ---object literals---
-        "ObjectExpression > Property > Identifier.key": (node: Identifier & Rule.NodeParentExtension): void =>
-            { checkClassFieldsMethodsAndObjectFieldsMethods(node, IgnoreSingleWordsIn.OBJECT_FIELD); },
+        "ObjectExpression > Property > Identifier.key": (node: Identifier & Rule.NodeParentExtension): void => {
+            checkClassFieldsMethodsAndObjectFieldsMethods(node, IgnoreSingleWordsIn.OBJECT_FIELD);
+        },
         // ---instance functions on classes---
         "MethodDefinition > Identifier.key": checkClassFieldsMethodsAndObjectFieldsMethods,
         // ---TS-only: class instance and static props---
@@ -684,8 +699,9 @@ function create(context: Rule.RuleContext): Rule.RuleListener {
             checkClassFieldsMethodsAndObjectFieldsMethods,
         // ---class props `this.xyz = ...`, `window.abc = ...`---
         "AssignmentExpression > MemberExpression > Identifier.property":
-            (node: Identifier & Rule.NodeParentExtension): void =>
-                { checkClassFieldsMethodsAndObjectFieldsMethods(node, IgnoreSingleWordsIn.OBJECT_FIELD); },
+            (node: Identifier & Rule.NodeParentExtension): void => {
+                checkClassFieldsMethodsAndObjectFieldsMethods(node, IgnoreSingleWordsIn.OBJECT_FIELD);
+            },
         // TS interface fields
         "TSInterfaceDeclaration > TSInterfaceBody > TSPropertySignature > Identifier.key":
             checkClassFieldsMethodsAndObjectFieldsMethods,
@@ -696,8 +712,9 @@ function create(context: Rule.RuleContext): Rule.RuleListener {
             checkClassFieldsMethodsAndObjectFieldsMethods,
         // TS enum members
         // note to self: astexplorer does not identify TSEnumBody below TSEnumDeclaration
-        "TSEnumDeclaration TSEnumMember > Identifier": (node: Identifier & Rule.NodeParentExtension): void =>
-            { checkClassFieldsMethodsAndObjectFieldsMethods(node, IgnoreSingleWordsIn.ENUM_MEMBER); },
+        "TSEnumDeclaration TSEnumMember > Identifier": (node: Identifier & Rule.NodeParentExtension): void => {
+            checkClassFieldsMethodsAndObjectFieldsMethods(node, IgnoreSingleWordsIn.ENUM_MEMBER);
+        },
 
         ImportDeclaration: checkImportDeclarations,
 

@@ -31,7 +31,7 @@ type Config = {
     maxTerms: number;
     binaryOperators: BinaryOperator[],
     includeTernary: boolean;
-}
+};
 
 const DEFAULT_PROPERTIES: Config = {
     maxHeight: 2,

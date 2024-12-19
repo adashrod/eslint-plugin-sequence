@@ -1,5 +1,7 @@
 import fs from "fs";
 
+/* global console */
+
 const distDir = "dist";
 const srcPrefix = "src/";
 

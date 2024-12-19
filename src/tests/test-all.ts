@@ -1,4 +1,7 @@
 import { addAlias } from "module-alias";
+
+/* global __dirname */
+
 /*
 not using _moduleAliases in package.json because:
 - we need different aliases for unit tests and runtime

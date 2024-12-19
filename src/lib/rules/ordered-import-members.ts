@@ -13,7 +13,7 @@ import { initializeConfig } from "@adashrodEps/lib/rules/util/eslint";
 type Config = {
     ignoreCase: boolean;
     sortSpecifiersWithComments: boolean;
-}
+};
 
 const DEFAULT_PROPERTIES: Config = {
     ignoreCase: false,
@@ -123,9 +123,10 @@ function create(context: Rule.RuleContext): Rule.RuleListener {
      * @returns an executed fix
      */
     function fixSpecifiersWithComments(
-            fixer: Rule.RuleFixer,
-            tokens: Ast.Token[],
-            importSpecifiers: Array<GenericSpecifier>): Rule.Fix {
+        fixer: Rule.RuleFixer,
+        tokens: Ast.Token[],
+        importSpecifiers: Array<GenericSpecifier>
+    ): Rule.Fix {
         if (importSpecifiers.some(s => !s.range)) {
             throw new Error("range property undefined in ImportSpecifier(s); can't do fix");
         }
