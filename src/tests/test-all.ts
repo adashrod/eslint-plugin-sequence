@@ -14,3 +14,5 @@ import "@adashrodEps/tests/rules/logical-expression-complexity";
 import "@adashrodEps/tests/rules/ordered-import-members";
 import "@adashrodEps/tests/rules/ordered-imports-by-path";
 import "@adashrodEps/tests/rules/strict-camel-case";
+import "@adashrodEps/tests/rules/util/ast-test";
+import "@adashrodEps/tests/rules/util/strings-test";

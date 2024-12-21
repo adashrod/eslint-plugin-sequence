@@ -47,6 +47,7 @@ esRuleTester.run("ordered-import-members", orderedImportMembersRule, {
             `Echo } from "alphabet";`,
     ],
     invalid: [{
+        // todo: is there a test case with comments and sortComments==false?
         code: `import { Bravo, Alpha } from "alphabet";`,
         errors: [{
             messageId: "sortMembersAlphabetically"

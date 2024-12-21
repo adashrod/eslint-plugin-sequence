@@ -172,7 +172,7 @@ function create(context: Rule.RuleContext): Rule.RuleListener {
             if (!nodesAreAdjacent(allImports[i], allImports[i + 1])) {
                 lastIndex = i;
                 break;
-            } 
+            }
         }
         return allImports.slice(firstIndex, lastIndex + 1);
     }

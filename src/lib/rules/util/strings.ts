@@ -96,7 +96,7 @@ export function capitalize(s: string): string {
  * @param s a string that's in camel case, strict (e.g. htmlToXml) or invalid (e.g. XMLHttpRequest)
  * @returns array of tokens
  */
-export function tokenizeInvalidCamelCase(s: string): string[] {
+export function tokenizePotentiallyInvalidCamelCase(s: string): string[] {
     const result: string[] = [];
     let tokenStart = 0;
     let capturingAllCapsToken = false;

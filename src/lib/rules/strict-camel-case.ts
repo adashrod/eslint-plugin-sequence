@@ -17,8 +17,8 @@ import {
     isAllCapsSnakeCase,
     isMixedSnakeCase,
     isUpper,
-    tokenizeInvalidCamelCase,
-    tokenizeMixedSnakeCase
+    tokenizeMixedSnakeCase,
+    tokenizePotentiallyInvalidCamelCase
 } from "@adashrodEps/lib/rules/util/strings";
 
 /* global console */
@@ -266,7 +266,7 @@ function create(context: Rule.RuleContext): Rule.RuleListener {
             }
         } else {
             log(LogLevel.TRACE, `tokenizing "${s}" as camel case`);
-            tokens = tokenizeInvalidCamelCase(s);
+            tokens = tokenizePotentiallyInvalidCamelCase(s);
             const invalidIndexes: number[] = [];
             tokens.forEach((token, i) => {
                 if (isAllCaps(token)) {
