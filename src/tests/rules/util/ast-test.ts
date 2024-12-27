@@ -89,7 +89,7 @@ describe("ast", () => {
         });
 
         it("returns null if there are no tokens", () => {
-            strictEqual(findPunctuatorBetween([], 0, 10, ","), 1);
+            strictEqual(findPunctuatorBetween([], 0, 10, ","), null);
         });
     });
 });
