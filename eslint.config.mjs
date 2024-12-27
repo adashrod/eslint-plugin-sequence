@@ -50,12 +50,11 @@ export default [
             "no-unneeded-ternary": ["error", {
                 defaultAssignment: false
             }],
-            "no-unused-vars": "off", // very broken for enums
+            "no-unused-vars": "off", // very broken for TS features
             "no-void": ["error", {
                 allowAsStatement: true
             }],
             "radix": "error",
-
 
             "sequence/logical-expression-complexity": ["warn", {
                 maxHeight: 3
@@ -99,6 +98,7 @@ export default [
             "@typescript-eslint/no-confusing-void-expression": "error",
             "@typescript-eslint/no-extraneous-class": "error",
             "@typescript-eslint/no-floating-promises": "error",
+            "@typescript-eslint/no-unused-vars": "error",
             "@typescript-eslint/strict-boolean-expressions": ["warn", {
                 allowString: false,
                 allowNumber: false,
