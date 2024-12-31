@@ -1,6 +1,6 @@
 {
     "name": "eslint-plugin-sequence",
-    "version": "0.7.0",
+    "version": "1.0.0",
     "description": "A collection of EsLint rules variously related to sequences: import sorting, ordering, etc",
     "main": "index.js",
     "dependencies": {
@@ -21,6 +21,9 @@
         "ts-node": "^10.9.2",
         "typescript": "^5.7.2",
         "typescript-eslint": "^8.18.0"
+    },
+    "peerDependencies": {
+        "eslint": "9.x"
     },
     "scripts": {
         "test": "ts-node src/tests/test-all.ts",
