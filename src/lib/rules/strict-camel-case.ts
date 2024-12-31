@@ -7,6 +7,7 @@ import type {
     PropertyDefinition,
     VariableDeclaration
 } from "estree";
+import console from "node:console";
 
 import { initializeConfig } from "@adashrodEps/lib/rules/util/eslint";
 import { objectToString } from "@adashrodEps/lib/rules/util/serialization";
@@ -20,8 +21,6 @@ import {
     tokenizeMixedSnakeCase,
     tokenizePotentiallyInvalidCamelCase
 } from "@adashrodEps/lib/rules/util/strings";
-
-/* global console */
 
 /**
  * @fileoverview Rule to enforce strict camel case in identifiers

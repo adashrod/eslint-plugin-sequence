@@ -18,7 +18,6 @@
         "@typescript-eslint/parser": "^8.18.0",
         "@typescript-eslint/rule-tester": "^8.18.0",
         "eslint": "^9.17.0",
-        "eslint-plugin-import": "^2.31.0",
         "eslint-plugin-sequence": "^1.0.0",
         "ts-node": "^10.9.2",
         "typescript": "^5.7.2",

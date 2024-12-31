@@ -1,6 +1,5 @@
 import fs from "fs";
-
-/* global console */
+import console from "node:console";
 
 const distDir = "dist";
 const srcPrefix = "src/";
