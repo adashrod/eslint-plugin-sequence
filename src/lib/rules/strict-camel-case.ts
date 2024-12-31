@@ -42,20 +42,16 @@ enum IgnoreSingleWordsIn {
 }
 
 type Config = {
-    ignoreProperties: boolean;
     ignoreImports: boolean;
     ignoredIdentifiers: string[];
     allowOneCharWords: AllowOneCharWords;
-    ignoreSingleWords: boolean;
     ignoreSingleWordsIn: IgnoreSingleWordsIn[]
 };
 
 const DEFAULT_PROPERTIES: Config = {
-    ignoreProperties: false,
     ignoreImports: false,
     ignoredIdentifiers: [],
     allowOneCharWords: AllowOneCharWords.NEVER,
-    ignoreSingleWords: false,
     ignoreSingleWordsIn: []
 };
 
@@ -71,10 +67,6 @@ const meta: Rule.RuleMetaData = {
     schema: [{
         type: "object",
         properties: {
-            ignoreProperties: {
-                type: "boolean",
-                default: DEFAULT_PROPERTIES.ignoreProperties
-            },
             ignoreImports: {
                 type: "boolean",
                 default: DEFAULT_PROPERTIES.ignoreImports
@@ -96,10 +88,6 @@ const meta: Rule.RuleMetaData = {
                     AllowOneCharWords.LAST
                 ],
                 default: DEFAULT_PROPERTIES.allowOneCharWords
-            },
-            ignoreSingleWords: {
-                type: "boolean",
-                default: DEFAULT_PROPERTIES.ignoreSingleWords
             },
             ignoreSingleWordsIn: {
                 type: "array",
@@ -157,8 +145,7 @@ const ORDERED_LOG_LEVELS = [
 
 function create(context: Rule.RuleContext): Rule.RuleListener {
     const cfg = initializeConfig(context.options, DEFAULT_PROPERTIES),
-        // context.getSourceCode() is deprecated, but context.sourceCode is always undefined in older eslint
-        sourceCode = context.sourceCode ?? context.getSourceCode();
+        sourceCode = context.sourceCode;
 
     let currentLogLevel: LogLevel;
 
@@ -205,12 +192,9 @@ function create(context: Rule.RuleContext): Rule.RuleListener {
      * check("XMLToHTML") -> { valid: false, suggestion: "XmlToHtml" }
      * check("XmlToHtml") -> { valid: true, suggestion: null }
      *
-     * Note: the value of the configs `ignoreSingleWords`, `ignoreSingleWordsIn`, and `allowOneCharWords` affect
-     * the results.
-     * with `ignoreSingleWords=true`
-     * check("HTML") -> { valid: true, suggestion: null }
-     * with `ignoreSingleWords=false`
-     * check("HTML") -> { valid: false, suggestion: "Html" }
+     * Note: the value of the configs `ignoreSingleWordsIn`, and `allowOneCharWords` affect the results.
+     * with code `class HTML {}`, ignoreAllCapsIfSingleWord is false because this context is not one for constants
+     * check("HTML", false) -> { valid: false, suggestion: "Html" }
      * with `ignoreSingleWordsIn=["first_class_constant"]` and code `const VERSION = "1.0"`,
      *     ignoreAllCapsIfSingleWord is true
      * check("VERSION", true) -> { valid: true, suggestion: null }
@@ -237,13 +221,14 @@ function create(context: Rule.RuleContext): Rule.RuleListener {
         let tokens: string[] = [];
         if (cfg.ignoredIdentifiers.includes(s)) {
             valid = true;
-        } else if (isAllCapsAndDigits(s) && (cfg.ignoreSingleWords || ignoreAllCapsIfSingleWord)) {
+        } else if (isAllCapsAndDigits(s) && ignoreAllCapsIfSingleWord) {
             // using isAllCapsAndDigits and not isAllCaps to allow one-word names like "HTML5". This is a slight
             // deviation from the tokenization behavior in that tokenize() still treats "HTML5" as two tokens, but
             // fixing that tokenization to match this wouldn't affect the suggestions and the tokens aren't exposed
             // to the user, so it's unimportant.
-            // ignoreSingleWords=true means treat "HTML" as a constant, not invalid camel case
-            log(LogLevel.TRACE, `skipping ambiguous "${s}" due to ignoreSingleWords=true or ignorSingleWordsIn config`);
+            // ignoreAllCapsIfSingleWord=true means treat "HTML" as a constant because the current context is
+            // interpreted as "constants"
+            log(LogLevel.TRACE, `skipping ambiguous "${s}" due to ignorSingleWordsIn config`);
             valid = true;
         } else if (isAllCapsSnakeCase(s)) {
             // constants like THIS_IS_A_CONSTANT
@@ -377,11 +362,7 @@ function create(context: Rule.RuleContext): Rule.RuleListener {
     }
 
     function checkDeclarations(node: Rule.Node, singleWordExemptionType?: IgnoreSingleWordsIn): void {
-        // compatibility with EsLint 7.x, 8.x and upcoming 9
-        for (const variable of (typeof sourceCode.getDeclaredVariables === "function" ?
-            sourceCode.getDeclaredVariables(node) :
-            context.getDeclaredVariables(node))
-        ) { // funcName+params, mult var decl in one stmt
+        for (const variable of sourceCode.getDeclaredVariables(node)) { // funcName+params, mult var decl in one stmt
             log(LogLevel.DEBUG, `*Declaration checking variable.name=${variable.name}`);
             const response = checkValidityAndGetSuggestion(variable.name,
                 cfg.ignoreSingleWordsIn.includes(singleWordExemptionType as IgnoreSingleWordsIn));
@@ -417,18 +398,14 @@ function create(context: Rule.RuleContext): Rule.RuleListener {
             log(LogLevel.TRACE, `skipping object property in RHS of assignment expression`);
             return;
         }
-        if (!cfg.ignoreProperties) {
-            log(LogLevel.DEBUG, `class/object field/method declarations checking ${node.name}`);
-            const response = checkValidityAndGetSuggestion(node.name,
-                cfg.ignoreSingleWordsIn.includes(singleWordExemptionType as IgnoreSingleWordsIn));
-            if (!response.valid) {
-                log(LogLevel.TRACE, () => [`Field/method declarations reporting ${node.name}`, objectToString(node)]);
-                report(node, response.suggestion, "Field/method declarations");
-            } else {
-                log(LogLevel.TRACE, `field/method declarations: PASS node.name=${node.name}`);
-            }
+        log(LogLevel.DEBUG, `class/object field/method declarations checking ${node.name}`);
+        const response = checkValidityAndGetSuggestion(node.name,
+            cfg.ignoreSingleWordsIn.includes(singleWordExemptionType as IgnoreSingleWordsIn));
+        if (!response.valid) {
+            log(LogLevel.TRACE, () => [`Field/method declarations reporting ${node.name}`, objectToString(node)]);
+            report(node, response.suggestion, "Field/method declarations");
         } else {
-            log(LogLevel.TRACE, `field/method declarations skipping node.name=${node.name} due to config`);
+            log(LogLevel.TRACE, `field/method declarations: PASS node.name=${node.name}`);
         }
     }
 
@@ -448,11 +425,7 @@ function create(context: Rule.RuleContext): Rule.RuleListener {
             return false;
         }
         if (!cfg.ignoreImports) {
-            // compatibility with EsLint 7.x, 8.x and upcoming 9
-            for (const variable of (typeof sourceCode.getDeclaredVariables === "function" ?
-                sourceCode.getDeclaredVariables(node) :
-                context.getDeclaredVariables(node))
-            ) {
+            for (const variable of sourceCode.getDeclaredVariables(node)) {
                 log(LogLevel.DEBUG, `ImportDeclaration checking ${variable.name}`);
                 const response = checkValidityAndGetSuggestion(variable.name);
                 if (response.valid) {

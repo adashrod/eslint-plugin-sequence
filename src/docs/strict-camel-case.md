@@ -67,11 +67,9 @@ Further reading:
 "rules": {
     "sequence/strict-camel-case": [
         "error", {
-            "ignoreProperties": false,
             "ignoreImports": false,
             "ignoredIdentifiers": ["htmlToXML", "legacyAPI"],
             "allowOneCharWords": "last",
-            "ignoreSingleWords": false,
             "ignoreSingleWordsIn": ["enum_member", "static_class_field"]
         }
     ],
@@ -163,7 +161,7 @@ default: `[]`
 Identifiers that are all-caps and contain only one word are inherently ambiguous, e.g. `HTML, JSON, PI, TAU, EPSILON`. Any of these could be names of classes that are in loose camel case, or names of constants that are in all-caps snake case. There's no way to make that determination without knowing the semantic meaning of them.
 Adding additional words demontstrates how the single-word versions are ambiguous: `HTMLTags, JSONSerializer, TAU_IS_2_PI, EPSILON_UNCERTAINTY`.
 
-As opposed to `ignoreSingleWords`, which is very broad, this option lets you allow all-caps single words in certain contexts that are likely to have constant members. For example, you can allowlist 1st-class constants (`export const MAX = 10`) or static class fields (`class Util { public static MAX = 10; }`), but not identifiers that are not usually used as constants (`class API {}` or `type HTML = {...}`).
+This option lets you allow all-caps single words in certain contexts that are likely to have constant members. For example, you can allowlist 1st-class constants (`export const MAX = 10`) or static class fields (`class Util { public static MAX = 10; }`), but not identifiers that are *not* usually used as constants (`class API {}` or `type HTML = {...}`).
 
 #### Example allowed single-word identifiers with each option:
 
@@ -197,52 +195,3 @@ class MyUtil {
     public static VERSION = "1.0";
 }
 ```
-
-## ignoreProperties (deprecated)
-
-type: `boolean`
-
-default: `false`
-
-#### This option will be removed in a future release. Please use `ignoredIdentifiers` and/or `ignoreSingleWordsIn` instead
-
-Set to `true` to ignore: class fields, class methods, object keys, object methods, and private fields and methods.
-
-Example items that are ignored:
-```javascript
-let obj = {
-    ignoredKey: 10,
-    ignoredFunction() {}
-};
-
-class MyJsClass {
-    constructor() {
-        this.ignoredProperty = "";
-    }
-    ignoredFunction() {}
-    #ignoredPrivateField = 5;
-    #ignoredPrivateFunction() {}
-}
-
-class MyTsClass {
-    public ignoredField: string = "";
-}
-```
-
-## ignoreSingleWords (deprecated)
----
-
-type: `boolean`
-
-default: `false`
-
-#### This option will be removed in a future release. Please use `ignoredIdentifiers` and/or `ignoreSingleWordsIn` instead
-
-Identifiers that are all-caps and contain only one word are inherently ambiguous, e.g. `HTML, JSON, PI, TAU, EPSILON`. Any of these could be names of classes that are in loose camel case, or names of constants that are in all-caps snake case. There's no way to make that determination without knowing the semantic meaning of them.
-Adding additional words demontstrates how the single-word versions are ambiguous: `HTMLTags, JSONSerializer, TAU_IS_2_PI, EPSILON_UNCERTAINTY`.
-
-`true`: all-caps single-word identifiers are ignored and don't trigger errors (assumed to be all-caps snake case, i.e. constants)
-
-`false`: all-caps single-word identifiers trigger errors (assumed to be loose camel case)
-
-If you'd like to enforce `strict-camel-case` on single-word identifiers, but not trigger errors for single-word all-caps constants, ~~consider keeping this option set to `false` and either adding your constant names to the `ignoredIdentifiers` option, or using `/* eslint-disable sequence/strict-camel-case */` around your constants.~~ use `ignoreSingleWordsIn` to specify how you are using constants or put your identifiers in `ignoredIdentifiers`.

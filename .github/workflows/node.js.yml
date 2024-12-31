@@ -23,7 +23,6 @@ jobs:
         -   run: npm ci
         -   run: npm run lint
     unit_tests:
-
         runs-on: ubuntu-latest
 
         strategy:

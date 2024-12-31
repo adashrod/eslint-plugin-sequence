@@ -60,8 +60,7 @@ type GenericSpecifier = ImportSpecifier | ImportDefaultSpecifier | ImportNamespa
 
 function create(context: Rule.RuleContext): Rule.RuleListener {
     const cfg = initializeConfig(context.options, DEFAULT_PROPERTIES),
-        // context.getSourceCode() is deprecated, but context.sourceCode is always undefined in older eslint
-        sourceCode = context.sourceCode ?? context.getSourceCode();
+        sourceCode = context.sourceCode;
 
     /**
      * Comparares ImportSpecifiers by name, honoring the value of ignoreCase

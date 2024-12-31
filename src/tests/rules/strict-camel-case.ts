@@ -34,9 +34,6 @@ describe("strict-camel-case ES", () => {
                 }, {
                     code: `const getX = () => {};`,
                     options: [{ allowOneCharWords: "last" }]
-                }, {
-                    code: `class API {}`,
-                    options: [{ ignoreSingleWords: true }]
                 },
                 `const apiApiApi = "...";`,
                 `const someFunc = (firstParam, secondParam) => {};`,
@@ -47,9 +44,6 @@ describe("strict-camel-case ES", () => {
                 `try { throw new Error(); } catch (anIoException) {}`,
                 `let obj = { htmlApi: "..." }`,
                 {
-                    code: `let obj = { htmlAPI: "..." };`,
-                    options: [{ ignoreProperties: true }]
-                }, {
                     code: `let JSONAPI = {}, xmlApi = {};`,
                     options: [{ ignoredIdentifiers: ["JSONAPI"] }]
                 },
@@ -156,7 +150,6 @@ describe("strict-camel-case ES", () => {
                 }]
             }, {
                 code: `class API {}`,
-                options: [{ ignoreSingleWords: false }],
                 errors: [{
                     messageId: "notCamelCaseWithSuggestion",
                     suggestions: [{
