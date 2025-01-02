@@ -1,14 +1,12 @@
 import type { AST as Ast, Rule } from "eslint";
 import type {
     ImportDeclaration,
-    ImportDefaultSpecifier,
-    ImportNamespaceSpecifier,
-    ImportSpecifier,
     Program
 } from "estree";
 
-import { findPunctuatorAfter, findPunctuatorBetween } from "@adashrodEps/lib/rules/util/ast";
 import { initializeConfig } from "@adashrodEps/lib/rules/util/eslint";
+import { fixUnsortedKeysWithComments } from "@adashrodEps/lib/rules/util/fix";
+import { GenericImportSpecifier } from "@adashrodEps/lib/rules/util/types";
 
 type Config = {
     ignoreCase: boolean;
@@ -56,8 +54,6 @@ const meta: Rule.RuleMetaData = {
     }
 };
 
-type GenericSpecifier = ImportSpecifier | ImportDefaultSpecifier | ImportNamespaceSpecifier;
-
 function create(context: Rule.RuleContext): Rule.RuleListener {
     const cfg = initializeConfig(context.options, DEFAULT_PROPERTIES),
         sourceCode = context.sourceCode;
@@ -69,7 +65,7 @@ function create(context: Rule.RuleContext): Rule.RuleListener {
      * @param specifierB an ImportSpecifier
      * @returns comparator result
      */
-    function importSpecifierComparator(specifierA: GenericSpecifier, specifierB: GenericSpecifier): number {
+    function importSpecifierComparator(specifierA: GenericImportSpecifier, specifierB: GenericImportSpecifier): number {
         const nameA = cfg.ignoreCase ? specifierA.local.name.toLowerCase() : specifierA.local.name;
         const nameB = cfg.ignoreCase ? specifierB.local.name.toLowerCase() : specifierB.local.name;
         return nameA > nameB ? 1 : -1;
@@ -83,7 +79,7 @@ function create(context: Rule.RuleContext): Rule.RuleListener {
      * @param importSpecifiers all specifiers in an ImportDeclaration
      * @returns an executed fix
      */
-    function fixSimpleSpecifiers(fixer: Rule.RuleFixer, importSpecifiers: Array<GenericSpecifier>): Rule.Fix {
+    function fixSimpleSpecifiers(fixer: Rule.RuleFixer, importSpecifiers: Array<GenericImportSpecifier>): Rule.Fix {
         if (importSpecifiers.some(s => !s.range)) {
             throw new Error("range property undefined in ImportSpecifier(s); can't do fix");
         }
@@ -98,65 +94,6 @@ function create(context: Rule.RuleContext): Rule.RuleListener {
                             importSpecifiers[index].range![1],
                             importSpecifiers[index + 1].range![0]))
                 )
-                .join("")
-        );
-    }
-
-    /**
-     * Given a list of specifiers that need to be sorted, and do have surrounding comments, sort them by specifier
-     * name, maintaining comments relative to specifiers.
-     * E.g. before:
-     * import {
-     *     B, // beautiful
-     *     A // awesome
-     * } from ...
-     * after:
-     * import {
-     *     A, // awesome
-     *     B, // beautiful
-     * } from ...
-     *
-     * @param fixer            the rule fixer
-     * @param tokens           array of program tokens
-     * @param importSpecifiers all specifiers in an ImportDeclaration
-     * @returns an executed fix
-     */
-    function fixSpecifiersWithComments(
-        fixer: Rule.RuleFixer,
-        tokens: Ast.Token[],
-        importSpecifiers: Array<GenericSpecifier>
-    ): Rule.Fix {
-        if (importSpecifiers.some(s => !s.range)) {
-            throw new Error("range property undefined in ImportSpecifier(s); can't do fix");
-        }
-        // using the closing brace as the bound ensures that any comments after the last specifier get moved along
-        // with that specifier
-        const closingBraceToken = findPunctuatorAfter(tokens,
-            importSpecifiers[importSpecifiers.length - 1].range![1], "}");
-        if (!closingBraceToken) {
-            throw new Error("no `}` found at end of specifier list");
-        }
-        const trailingCommaToken = findPunctuatorBetween(tokens,
-            importSpecifiers[importSpecifiers.length - 1].range![1],
-            closingBraceToken.range[0],
-            ",");
-        return fixer.replaceTextRange(
-            [importSpecifiers[0].range![0], closingBraceToken.range[0]],
-            importSpecifiers.slice()
-                .map((specifier, index: number) =>
-                    sourceCode.getText(specifier) +
-                        (index + 1 === importSpecifiers.length && !trailingCommaToken ? "," : "") +
-                        sourceCode.getText().slice(specifier.range![1],
-                            index + 1 < importSpecifiers.length ?
-                                importSpecifiers[index + 1].range![0] :
-                                closingBraceToken.range[0])
-                )
-                // at this point the mapped strings contain the specifiers, commas, and comments
-                .sort((specifierStringA, specifierStringB) => {
-                    const nameA = cfg.ignoreCase ? specifierStringA.toLowerCase() : specifierStringA;
-                    const nameB = cfg.ignoreCase ? specifierStringB.toLowerCase() : specifierStringB;
-                    return nameA > nameB ? 1 : -1;
-                })
                 .join("")
         );
     }
@@ -186,10 +123,12 @@ function create(context: Rule.RuleContext): Rule.RuleListener {
                                 sourceCode.getCommentsAfter(specifier).length);
                         if (specifiersHaveComments) {
                             return cfg.sortSpecifiersWithComments ?
-                                fixSpecifiersWithComments(
+                                fixUnsortedKeysWithComments(
                                     fixer,
+                                    importSpecifiers,
                                     (node.parent as Program as Ast.Program).tokens,
-                                    importSpecifiers) :
+                                    sourceCode,
+                                    cfg.ignoreCase) :
                                 null;
                         }
                         return fixSimpleSpecifiers(fixer, importSpecifiers);
