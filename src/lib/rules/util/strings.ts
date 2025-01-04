@@ -1,3 +1,5 @@
+import stringNaturalCompare from "string-natural-compare";
+
 const alphaPattern = /\p{L}/u;
 const digitPattern = /\d/;
 const underscoreTrimPattern = /^(_*).*?(_*)$/;
@@ -146,7 +148,7 @@ export function tokenizeMixedSnakeCase(s: string): string[] {
     }
     const leadingUnderscores = underscorePaddingMatch.length >= 2 ? underscorePaddingMatch[1] : "";
     const trailingUnderscores = underscorePaddingMatch.length >= 3 ? underscorePaddingMatch[2] : "";
-    const tokens = s.split(/_+/).filter(token => token.length);
+    const tokens = s.split(/_+/).filter(token => token.length > 0);
     if (leadingUnderscores.length > 0) {
         tokens.unshift(leadingUnderscores);
     }
@@ -176,4 +178,38 @@ export function isAllCapsSnakeCase(s: string): boolean {
  */
 export function isMixedSnakeCase(s: string): boolean {
     return mixedSnakeCasePattern.test(s);
+}
+
+export type StringCompareOptions = {
+    ignoreCase: boolean;
+    natural: boolean;
+};
+/**
+ * Compares two strings, for use in sorting. Note: this only uses code points for comparison, so it won't properly
+ * compare accented characters and should only be used for ASCII characters.
+ *
+ * @param a a string
+ * @param b a string
+ * @param options ignoreCase: true for case-insensitive, false for case-sensitive; natural: true for natural (numeric)
+ *                sort, false for lexicographic sort
+ * @returns a negative number if a should come before b, a positive number if a should come after b, and 0 if they are
+ *          equal
+ */
+export function stringCompare(a: string, b: string, options: StringCompareOptions): number {
+    let aString = a;
+    let bString = b;
+    if (options.ignoreCase) {
+        aString = aString.toLocaleLowerCase();
+        bString = bString.toLocaleLowerCase();
+    }
+    // we're not using String.prototype.localeCompare because although it has the { numeric: true } option for natural
+    // comparison, it doesn't have an option to be case-sensitive for all chars, only for comparing a lower-case letter
+    // against the same letter in upper-case
+    if (options.natural) {
+        return stringNaturalCompare(aString, bString);
+    }
+    if (aString === bString) {
+        return 0;
+    }
+    return aString < bString ? -1 : 1;
 }

@@ -41,10 +41,26 @@ describe("ordered-destructuring", () => {
                     `/* charlie,\n` +
                     `delta,*/\n` +
                     `echo } = {};`,
+                `const {\n` +
+                    `alpha, // first letter\n` +
+                    `bravo,\n` +
+                    `// charlie,\n` +
+                    `delta: { deltaSub1: { x, y } }` +
+                    `} = {};`,
                 {
                     code: `const { Alpha, bravoFun, Charlie } = {};\n`,
                     options: [{ ignoreCase: true }]
                 },
+                `const { key1, key10, key5 } = {}`,
+                {
+                    code: `const { key1, key5, key10 } = {}`,
+                    options: [{ natural: true }]
+                },
+                {
+                    code: `const { key1, Key5, key10 } = {}`,
+                    options: [{ ignoreCase: true, natural: true }]
+                },
+                `function func({ a, b, c }) {}`
             ],
             invalid: [{
                 code: `let { b, a, c } = {};`,
@@ -128,12 +144,73 @@ describe("ordered-destructuring", () => {
                     `...theRest\n` +
                     `} = {};`
             }, {
+                code: `const {\n` +
+                    `bravo,\n` +
+                    `alpha, // first letter\n` +
+                    `// charlie,\n` +
+                    `delta: { deltaSub1: { x, y } }\n` +
+                    `//...theRest\n` +
+                    `} = {};`,
+                errors: [{ messageId: "sortPropsInObjectPattern" }],
+                output: `const {\n` +
+                    `alpha, // first letter\n` +
+                    `// charlie,\n` +
+                    `bravo,\n` +
+                    `delta: { deltaSub1: { x, y } },\n` +
+                    `//...theRest\n` +
+                    `} = {};`
+            }, {
+                code: `const {\n` +
+                    `bravo,\n` +
+                    `alpha, // first letter\n` +
+                    `delta: { deltaSub1: { x, y } },\n` +
+                    `// charlie,\n` +
+                    `...theRest\n` +
+                    `} = {};`,
+                errors: [{ messageId: "sortPropsInObjectPattern" }],
+                output: `const {\n` +
+                    `alpha, // first letter\n` +
+                    `bravo,\n` +
+                    `delta: { deltaSub1: { x, y } },\n` +
+                    `// charlie,\n` +
+                    `...theRest\n` +
+                    `} = {};`
+            }, {
+                code: `const {\n` +
+                    `delta: { deltaSub1: { x, y } },\n` +
+                    `// charlie,\n` +
+                    `bravo,\n` +
+                    `alpha, // first letter\n` +
+                    `...theRest\n` +
+                    `} = {};`,
+                errors: [{ messageId: "sortPropsInObjectPattern" }, { messageId: "sortPropsInObjectPattern" }],
+                output: `const {\n` +
+                    `alpha, // first letter\n` +
+                    `bravo,\n` +
+                    `delta: { deltaSub1: { x, y } },\n` +
+                    `// charlie,\n` +
+                    `...theRest\n` +
+                    `} = {};`
+            }, {
                 code: `const { Delta, Echo, Foxtrot, alphaFun, bravoFun, charlieFun } = {};`,
                 options: [{ ignoreCase: true }],
                 errors: [{ messageId: "sortPropsInObjectPattern" }],
                 output: `const { alphaFun, bravoFun, charlieFun, Delta, Echo, Foxtrot, } = {};`
+            }, {
+                code: `const { key1, key10, key5 } = {}`,
+                options: [{ natural: true }],
+                errors: [{ messageId: "sortPropsInObjectPattern" }],
+                output: `const { key1, key5, key10, } = {}`
+            }, {
+                code: `const { Key10, key5, key2 } = {}`,
+                options: [{ ignoreCase: true, natural: true }],
+                errors: [{ messageId: "sortPropsInObjectPattern" }, { messageId: "sortPropsInObjectPattern" }],
+                output: `const { key2, key5, Key10, } = {}`
+            }, {
+                code: `function func({ b, a, c }) {}`,
+                errors: [{ messageId: "sortPropsInObjectPattern" }],
+                output: `function func({ a, b, c, }) {}`
             }]
         });
-        
     });
 });

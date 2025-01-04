@@ -6,6 +6,7 @@ import type {
 
 import { initializeConfig } from "@adashrodEps/lib/rules/util/eslint";
 import { fixUnsortedKeysWithComments } from "@adashrodEps/lib/rules/util/fix";
+import { stringCompare } from "@adashrodEps/lib/rules/util/strings";
 import { GenericImportSpecifier } from "@adashrodEps/lib/rules/util/types";
 
 type Config = {
@@ -66,9 +67,7 @@ function create(context: Rule.RuleContext): Rule.RuleListener {
      * @returns comparator result
      */
     function importSpecifierComparator(specifierA: GenericImportSpecifier, specifierB: GenericImportSpecifier): number {
-        const nameA = cfg.ignoreCase ? specifierA.local.name.toLowerCase() : specifierA.local.name;
-        const nameB = cfg.ignoreCase ? specifierB.local.name.toLowerCase() : specifierB.local.name;
-        return nameA > nameB ? 1 : -1;
+        return stringCompare(specifierA.local.name, specifierB.local.name, { ignoreCase: cfg.ignoreCase, natural: false });
     }
 
     /**
@@ -120,7 +119,7 @@ function create(context: Rule.RuleContext): Rule.RuleListener {
                     fix(fixer: Rule.RuleFixer) {
                         const specifiersHaveComments = importSpecifiers.some(specifier =>
                             (sourceCode.getCommentsBefore(specifier).length > 0) ||
-                                sourceCode.getCommentsAfter(specifier).length);
+                                sourceCode.getCommentsAfter(specifier).length > 0);
                         if (specifiersHaveComments) {
                             return cfg.sortSpecifiersWithComments ?
                                 fixUnsortedKeysWithComments(
@@ -128,7 +127,7 @@ function create(context: Rule.RuleContext): Rule.RuleListener {
                                     importSpecifiers,
                                     (node.parent as Program as Ast.Program).tokens,
                                     sourceCode,
-                                    cfg.ignoreCase) :
+                                    { ignoreCase: cfg.ignoreCase, natural: false }) :
                                 null;
                         }
                         return fixSimpleSpecifiers(fixer, importSpecifiers);

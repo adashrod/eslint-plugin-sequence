@@ -12,6 +12,7 @@ import {
     isLower,
     isMixedSnakeCase,
     isUpper,
+    stringCompare,
     tokenizeMixedSnakeCase,
     tokenizePotentiallyInvalidCamelCase
 } from "@adashrodEps/lib/rules/util/strings";
@@ -143,7 +144,7 @@ describe("strings", () => {
             ["aoeu", "Aoeu"],
             ["hello", "Hello"],
             ["World", "World"]
-        ].forEach(([before, after]) => 
+        ].forEach(([before, after]) =>
             it(`returns ${after} for ${before}`, () => {
                 strictEqual(capitalize(before), after);
             })
@@ -169,7 +170,7 @@ describe("strings", () => {
             ["_HelloWorld_", ["_", "Hello", "World_"]],
             ["_HelloWorld", ["_", "Hello", "World"]]
         ] satisfies [string, string[]][];
-        testCases.forEach(([s, result]) => 
+        testCases.forEach(([s, result]) =>
             it(`returns ${result} for ${s}`, () => {
                 deepStrictEqual(tokenizePotentiallyInvalidCamelCase(s), result);
             })
@@ -188,7 +189,7 @@ describe("strings", () => {
             ["_hello_world_", ["_", "hello", "world", "_"]],
             ["_Hello_world_", ["_", "Hello", "world", "_"]],
         ] satisfies [string, string[]][];
-        testCases.forEach(([s, result]) => 
+        testCases.forEach(([s, result]) =>
             it(`returns ${result} for ${s}`, () => {
                 deepStrictEqual(tokenizeMixedSnakeCase(s), result);
             })
@@ -213,7 +214,7 @@ describe("strings", () => {
             "HelloWorld",
             "hello_world",
             "HELLO"
-        ].forEach(s => 
+        ].forEach(s =>
             it(`returns false for ${s}`, () => {
                 strictEqual(isAllCapsSnakeCase(s), false);
             })
@@ -231,7 +232,7 @@ describe("strings", () => {
             "_hello_world",
             "_hello_world_",
             "_Hello_world_",
-        ].forEach(s => 
+        ].forEach(s =>
             it(`returns true for ${s}`, () => {
                 strictEqual(isMixedSnakeCase(s), true);
             })
@@ -241,10 +242,66 @@ describe("strings", () => {
             "HelloWorld",
             "helloWorld",
             "hello"
-        ].forEach(s => 
+        ].forEach(s =>
             it(`returns false for ${s}`, () => {
                 strictEqual(isMixedSnakeCase(s), false);
             })
         );
+    });
+
+    describe("stringCompare", () => {
+        type ScTestCase = Parameters<typeof stringCompare>;
+
+        function testCaseDescription([left, right, options]: ScTestCase): string {
+            return `left: ${left}, right: ${right}, ignoreCase: ${options.ignoreCase}, natural: ${options.natural}`;
+        }
+
+        describe("a < b", () => {
+            const testCases: ScTestCase[] = [
+                ["a", "b", { ignoreCase: false, natural: false }],
+                ["A", "a", { ignoreCase: false, natural: false }],
+                ["A", "b", { ignoreCase: false, natural: false }],
+                ["A", "B", { ignoreCase: false, natural: false }],
+                ["a", "B", { ignoreCase: true, natural: false }],
+                ["key5", "key10", { ignoreCase: false, natural: true }],
+                ["key5", "Key10", { ignoreCase: true, natural: true }],
+            ] satisfies ScTestCase[];
+            testCases.forEach(([left, right, options]) =>
+                it(`returns -1 for ${testCaseDescription([left, right, options])}`, () => {
+                    strictEqual(stringCompare(left, right, options), -1, testCaseDescription([left, right, options]));
+                })
+            );
+        });
+
+        describe("a > b", () => {
+            const testCases: ScTestCase[] = [
+                ["b", "a", { ignoreCase: false, natural: false }],
+                ["a", "A", { ignoreCase: false, natural: false }],
+                ["b", "A", { ignoreCase: false, natural: false }],
+                ["B", "A", { ignoreCase: false, natural: false }],
+                ["B", "a", { ignoreCase: true, natural: false }],
+                ["key10", "key5", { ignoreCase: false, natural: true }],
+                ["Key10", "key5", { ignoreCase: true, natural: true }],
+            ] satisfies ScTestCase[];
+            testCases.forEach(([left, right, options]) =>
+                it(`returns 1 for ${testCaseDescription([left, right, options])}`, () => {
+                    strictEqual(stringCompare(left, right, options), 1, testCaseDescription([left, right, options]));
+                })
+            );
+        });
+
+        describe("a === b", () => {
+            const testCases: ScTestCase[] = [
+                ["a", "a", { ignoreCase: false, natural: false }],
+                ["a", "A", { ignoreCase: true, natural: false }],
+                ["A", "a", { ignoreCase: true, natural: false }],
+                ["A", "A", { ignoreCase: false, natural: false }],
+            ] satisfies ScTestCase[];
+            testCases.forEach(([left, right, options]) =>
+                it(`returns 0 for ${testCaseDescription([left, right, options])}`, () => {
+                    strictEqual(stringCompare(left, right, options), 0, testCaseDescription([left, right, options]));
+                })
+            );
+        });
     });
 });

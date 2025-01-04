@@ -8,6 +8,7 @@ import type {
 
 import { initializeConfig } from "@adashrodEps/lib/rules/util/eslint";
 import { fixUnsortedKeysWithComments } from "@adashrodEps/lib/rules/util/fix";
+import { stringCompare } from "@adashrodEps/lib/rules/util/strings";
 
 /**
  * @fileoverview Rule to enforce ordering of destructured properties in object patterns
@@ -16,10 +17,12 @@ import { fixUnsortedKeysWithComments } from "@adashrodEps/lib/rules/util/fix";
 
 type Config = {
     ignoreCase: boolean;
+    natural: boolean;
 };
 
 const DEFAULT_PROPERTIES: Config = {
-    ignoreCase: false
+    ignoreCase: false,
+    natural: false
 };
 
 const meta: Rule.RuleMetaData = {
@@ -37,6 +40,10 @@ const meta: Rule.RuleMetaData = {
             ignoreCase: {
                 type: "boolean",
                 default: DEFAULT_PROPERTIES.ignoreCase
+            },
+            natural: {
+                type: "boolean",
+                default: DEFAULT_PROPERTIES.natural
             }
         },
         additionalProperties: false
@@ -64,9 +71,10 @@ function create(context: Rule.RuleContext): Rule.RuleListener {
         }
         return trimmed as AssignmentProperty[];
     }
-    
+
     return {
         ObjectPattern: (node: ObjectPattern & Rule.NodeParentExtension): void => {
+            const sortConfig = { natural: cfg.natural, ignoreCase: cfg.ignoreCase};
             for (let i = 0; i + 1 < node.properties.length; i++) {
                 const current = node.properties[i];
                 const next = node.properties[i + 1];
@@ -86,13 +94,13 @@ function create(context: Rule.RuleContext): Rule.RuleListener {
                     currentName = currentName.toLocaleLowerCase();
                     nextName = nextName.toLocaleLowerCase();
                 }
-                if (currentName >= nextName) {
+                if (stringCompare(currentExpression.name, nextExpression.name, sortConfig) > 0) {
                     let program = currentExpression as unknown as BaseNode & Rule.NodeParentExtension;
                     while (program.type !== "Program") {
                         program = program.parent;
                     }
                     const programTokens = (program as unknown as Ast.Program).tokens;
-                    
+
                     context.report({
                         messageId: "sortPropsInObjectPattern",
                         data: {
@@ -100,9 +108,14 @@ function create(context: Rule.RuleContext): Rule.RuleListener {
                             next: nextExpression.name
                         },
                         loc: node.loc!,
-                        fix: (fixer: Rule.RuleFixer): Rule.Fix | null => 
+                        fix: (fixer: Rule.RuleFixer): Rule.Fix | null =>
                             Array.isArray(programTokens) ?
-                                fixUnsortedKeysWithComments(fixer, trimRest(node.properties), programTokens, context.sourceCode, cfg.ignoreCase) :
+                                fixUnsortedKeysWithComments(
+                                    fixer,
+                                    trimRest(node.properties),
+                                    programTokens,
+                                    context.sourceCode,
+                                    sortConfig) :
                                 null
                     });
                 }
