@@ -49,7 +49,7 @@ default: `false`
 
 Note: this parameter only affects behavior when using `--fix`. It doesn't change anything about how errors/warnings are reported.
 
-Warning: this is an experimental feature; use with caution. It can also cause odd whitespace rearrangement, but does not attempt to fix indentation. It can also cause trailing commas to be inserted after the list of members. Fixing whitespace and removing trailing commas (if desired) should be left to a formatter.
+Using the fix can cause odd whitespace rearrangement, but does not attempt to fix indentation. It can also cause trailing commas to be inserted after the list of members. Fixing whitespace and removing trailing commas (if desired) should be left to a [lint rule](https://eslint.style/rules/default/comma-dangle) or a [formatter](https://github.com/prettier/prettier).
 
 `false`: when using `--fix`, import members are rearranged if there are no surrounding comments.
 

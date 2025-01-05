@@ -38,6 +38,8 @@ example configuration:
 }
 ```
 
+Using the fix to sort keys can cause odd whitespace rearrangement, but does not attempt to fix indentation. It can also cause trailing commas to be inserted after the list of keys. Fixing whitespace and removing trailing commas (if desired) should be left to a [lint rule](https://eslint.style/rules/default/comma-dangle) or a [formatter](https://github.com/prettier/prettier).
+
 # Configuration
 
 ## ignoreCase
@@ -45,6 +47,8 @@ example configuration:
 type: `boolean`
 
 default: `false`
+
+Set to true to do case-insensitive sorting.
 
 ## natural
 
