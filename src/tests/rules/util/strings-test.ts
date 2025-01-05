@@ -19,58 +19,58 @@ import {
 
 describe("strings", () => {
     describe("isAlpha", () => {
-        it("returns true for a letter", () => {
-            strictEqual(isAlpha("a"), true);
+        it("returns true for a letter", (ctx) => {
+            strictEqual(isAlpha("a"), true, ctx.name);
         });
 
-        it("returns false for a digit", () => {
-            strictEqual(isAlpha("1"), false);
+        it("returns false for a digit", (ctx) => {
+            strictEqual(isAlpha("1"), false, ctx.name);
         });
 
-        it("returns false for a symbol", () => {
-            strictEqual(isAlpha("!"), false);
+        it("returns false for a symbol", (ctx) => {
+            strictEqual(isAlpha("!"), false, ctx.name);
         });
     });
 
     describe("isDigit", () => {
-        it("returns false for a letter", () => {
-            strictEqual(isDigit("a"), false);
+        it("returns false for a letter", (ctx) => {
+            strictEqual(isDigit("a"), false, ctx.name);
         });
 
-        it("returns true for a digit", () => {
-            strictEqual(isDigit("1"), true);
+        it("returns true for a digit", (ctx) => {
+            strictEqual(isDigit("1"), true, ctx.name);
         });
 
-        it("returns false for a symbol", () => {
-            strictEqual(isDigit("!"), false);
+        it("returns false for a symbol", (ctx) => {
+            strictEqual(isDigit("!"), false, ctx.name);
         });
     });
 
     describe("isUpper", () => {
-        it("returns false for a lower case letter", () => {
-            strictEqual(isUpper("a"), false);
+        it("returns false for a lower case letter", (ctx) => {
+            strictEqual(isUpper("a"), false, ctx.name);
         });
 
-        it("returns false for a digit", () => {
-            strictEqual(isUpper("1"), false);
+        it("returns false for a digit", (ctx) => {
+            strictEqual(isUpper("1"), false, ctx.name);
         });
 
-        it("returns true for an upper case letter", () => {
-            strictEqual(isUpper("N"), true);
+        it("returns true for an upper case letter", (ctx) => {
+            strictEqual(isUpper("N"), true, ctx.name);
         });
     });
 
     describe("isLower", () => {
-        it("returns true for a lower case letter", () => {
-            strictEqual(isLower("a"), true);
+        it("returns true for a lower case letter", (ctx) => {
+            strictEqual(isLower("a"), true, ctx.name);
         });
 
-        it("returns false for a digit", () => {
-            strictEqual(isLower("1"), false);
+        it("returns false for a digit", (ctx) => {
+            strictEqual(isLower("1"), false, ctx.name);
         });
 
-        it("returns false for an upper case letter", () => {
-            strictEqual(isLower("N"), false);
+        it("returns false for an upper case letter", (ctx) => {
+            strictEqual(isLower("N"), false, ctx.name);
         });
     });
 
@@ -81,8 +81,8 @@ describe("strings", () => {
             "WORLD",
             "XYZ"
         ].forEach(s => {
-            it(`returns true for ${s}`, () => {
-                strictEqual(isAllCaps(s), true);
+            it(`returns true for ${s}`, (ctx) => {
+                strictEqual(isAllCaps(s), true, ctx.name);
             });
         });
 
@@ -95,8 +95,8 @@ describe("strings", () => {
             "World",
             "Xyz"
         ].forEach(s =>
-            it(`returns false for ${s}`, () => {
-                strictEqual(isAllCaps(s), false);
+            it(`returns false for ${s}`, (ctx) => {
+                strictEqual(isAllCaps(s), false, ctx.name);
             })
         );
     });
@@ -112,8 +112,8 @@ describe("strings", () => {
             "WO5RLD",
             "XYZ2"
         ].forEach(s => {
-            it(`returns true for ${s}`, () => {
-                strictEqual(isAllCapsAndDigits(s), true);
+            it(`returns true for ${s}`, (ctx) => {
+                strictEqual(isAllCapsAndDigits(s), true, ctx.name);
             });
         });
 
@@ -133,8 +133,8 @@ describe("strings", () => {
             "Wo9rld",
             "X0yz"
         ].forEach(s =>
-            it(`returns false for ${s}`, () => {
-                strictEqual(isAllCapsAndDigits(s), false);
+            it(`returns false for ${s}`, (ctx) => {
+                strictEqual(isAllCapsAndDigits(s), false, ctx.name);
             })
         );
     });
@@ -145,8 +145,8 @@ describe("strings", () => {
             ["hello", "Hello"],
             ["World", "World"]
         ].forEach(([before, after]) =>
-            it(`returns ${after} for ${before}`, () => {
-                strictEqual(capitalize(before), after);
+            it(`returns ${after} for ${before}`, (ctx) => {
+                strictEqual(capitalize(before), after, ctx.name);
             })
         );
     });
@@ -171,8 +171,8 @@ describe("strings", () => {
             ["_HelloWorld", ["_", "Hello", "World"]]
         ] satisfies [string, string[]][];
         testCases.forEach(([s, result]) =>
-            it(`returns ${result} for ${s}`, () => {
-                deepStrictEqual(tokenizePotentiallyInvalidCamelCase(s), result);
+            it(`returns ${result} for ${s}`, (ctx) => {
+                deepStrictEqual(tokenizePotentiallyInvalidCamelCase(s), result, ctx.name);
             })
         );
     });
@@ -190,8 +190,8 @@ describe("strings", () => {
             ["_Hello_world_", ["_", "Hello", "world", "_"]],
         ] satisfies [string, string[]][];
         testCases.forEach(([s, result]) =>
-            it(`returns ${result} for ${s}`, () => {
-                deepStrictEqual(tokenizeMixedSnakeCase(s), result);
+            it(`returns ${result} for ${s}`, (ctx) => {
+                deepStrictEqual(tokenizeMixedSnakeCase(s), result, ctx.name);
             })
         );
     });
@@ -203,8 +203,8 @@ describe("strings", () => {
             "HELLO_WORLD_123_456C",
             "HELLO_WORLD_123A_456B_789"
         ].forEach(s => {
-            it(`returns true for ${s}`, () => {
-                strictEqual(isAllCapsSnakeCase(s), true);
+            it(`returns true for ${s}`, (ctx) => {
+                strictEqual(isAllCapsSnakeCase(s), true, ctx.name);
             });
         });
 
@@ -215,8 +215,8 @@ describe("strings", () => {
             "hello_world",
             "HELLO"
         ].forEach(s =>
-            it(`returns false for ${s}`, () => {
-                strictEqual(isAllCapsSnakeCase(s), false);
+            it(`returns false for ${s}`, (ctx) => {
+                strictEqual(isAllCapsSnakeCase(s), false, ctx.name);
             })
         );
     });
@@ -233,8 +233,8 @@ describe("strings", () => {
             "_hello_world_",
             "_Hello_world_",
         ].forEach(s =>
-            it(`returns true for ${s}`, () => {
-                strictEqual(isMixedSnakeCase(s), true);
+            it(`returns true for ${s}`, (ctx) => {
+                strictEqual(isMixedSnakeCase(s), true, ctx.name);
             })
         );
 
@@ -243,8 +243,8 @@ describe("strings", () => {
             "helloWorld",
             "hello"
         ].forEach(s =>
-            it(`returns false for ${s}`, () => {
-                strictEqual(isMixedSnakeCase(s), false);
+            it(`returns false for ${s}`, (ctx) => {
+                strictEqual(isMixedSnakeCase(s), false, ctx.name);
             })
         );
     });
@@ -267,8 +267,8 @@ describe("strings", () => {
                 ["key5", "Key10", { ignoreCase: true, natural: true }],
             ] satisfies ScTestCase[];
             testCases.forEach(([left, right, options]) =>
-                it(`returns -1 for ${testCaseDescription([left, right, options])}`, () => {
-                    strictEqual(stringCompare(left, right, options), -1, testCaseDescription([left, right, options]));
+                it(`returns -1 for ${testCaseDescription([left, right, options])}`, (ctx) => {
+                    strictEqual(stringCompare(left, right, options), -1, ctx.name);
                 })
             );
         });
@@ -284,8 +284,8 @@ describe("strings", () => {
                 ["Key10", "key5", { ignoreCase: true, natural: true }],
             ] satisfies ScTestCase[];
             testCases.forEach(([left, right, options]) =>
-                it(`returns 1 for ${testCaseDescription([left, right, options])}`, () => {
-                    strictEqual(stringCompare(left, right, options), 1, testCaseDescription([left, right, options]));
+                it(`returns 1 for ${testCaseDescription([left, right, options])}`, (ctx) => {
+                    strictEqual(stringCompare(left, right, options), 1, ctx.name);
                 })
             );
         });
@@ -298,8 +298,8 @@ describe("strings", () => {
                 ["A", "A", { ignoreCase: false, natural: false }],
             ] satisfies ScTestCase[];
             testCases.forEach(([left, right, options]) =>
-                it(`returns 0 for ${testCaseDescription([left, right, options])}`, () => {
-                    strictEqual(stringCompare(left, right, options), 0, testCaseDescription([left, right, options]));
+                it(`returns 0 for ${testCaseDescription([left, right, options])}`, (ctx) => {
+                    strictEqual(stringCompare(left, right, options), 0, ctx.name);
                 })
             );
         });

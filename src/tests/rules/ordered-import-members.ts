@@ -18,10 +18,9 @@ describe("ordered-import-members ES", () => {
         esRuleTester.run("ordered-import-members", orderedImportMembersRule, {
             valid: [
                 `import { Alpha, Bravo, Charlie } from "alphabet";`,
+                `import { Alpha, Bravo, Charlie, } from "alphabet";`,
                 {
-                    code: `import { Alpha } from "Alpha";\n` +
-                        `import bravoFun from "bravoFun";\n` +
-                        `import Charlie from "Charlie";\n`,
+                    code: `import { Alpha, bravoFun, Charlie } from "stuff";\n`,
                     options: [{ignoreCase: true}]
                 },
                 `import { Alpha, Bravo, Charlie, Delta } from "alphabet";`,
@@ -57,6 +56,12 @@ describe("ordered-import-members ES", () => {
                 }],
                 output: `import { Alpha, Bravo } from "alphabet";`
             }, {
+                code: `import { Bravo, Alpha, } from "alphabet";`,
+                errors: [{
+                    messageId: "sortMembersAlphabetically"
+                }],
+                output: `import { Alpha, Bravo, } from "alphabet";`
+            }, {
                 code: `import { Delta, Echo, Foxtrot, alphaFun, bravoFun, charlieFun } from "alphabet";`,
                 options: [{ignoreCase: true}],
                 errors: [{
@@ -79,6 +84,21 @@ describe("ordered-import-members ES", () => {
                     `Delta,\n` +
                     `// Alpha,\n` +
                     `Charlie } from "alphabet";`,
+                options: [{sortSpecifiersWithComments: true}],
+                errors: [{
+                    messageId: "sortMembersAlphabetically"
+                }],
+                output: `import {\n` +
+                    `Bravo, // second letter\n` +
+                    `Charlie, Delta,\n` +
+                    `// Alpha,\n` +
+                    `} from "alphabet";`
+            }, {
+                code: `import {\n` +
+                    `Bravo, // second letter\n` +
+                    `Delta,\n` +
+                    `// Alpha,\n` +
+                    `Charlie, } from "alphabet";`,
                 options: [{sortSpecifiersWithComments: true}],
                 errors: [{
                     messageId: "sortMembersAlphabetically"

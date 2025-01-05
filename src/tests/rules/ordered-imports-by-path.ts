@@ -19,7 +19,6 @@ describe("ordered-imports-by-path ES", () => {
             valid: [
                 `import Alpha from "Alpha";\n` +
                     `import Bravo from "Bravo";`,
-        
                 `import Alpha from "Alpha";\n` +
                     `import { Bravo } from "Bravo";\n` +
                     `import { Charlie } from "Charlie";\n` +
@@ -43,7 +42,7 @@ describe("ordered-imports-by-path ES", () => {
                     code: `import { Alpha } from "Alpha";\n` +
                         `import Bravo from "Bravo";\n` +
                         `import Charlie from "Charlie";\n\n` +
-        
+
                         `import Alice from "Alice";\n` +
                         `import Bob from "Bob";\n`,
                     options: [{allowSeparateGroups: true}]
@@ -107,7 +106,7 @@ describe("ordered-imports-by-path ES", () => {
                 code: `import { Alpha } from "Alpha";\n` +
                     `import Bravo from "Bravo";\n` +
                     `import Charlie from "Charlie";\n\n` +
-        
+
                     `import Alice from "Alice";\n` +
                     `import Bob from "Bob";\n`,
                 options: [{allowSeparateGroups: false}],
@@ -150,7 +149,7 @@ describe("ordered-imports-by-path ES", () => {
                     `import OrderedPair from "app/common/ordered-pair";\n` +
                     `import Monolith from "app/models/monolith";\n` +
                     `import Direction from "app/direction";\n\n` +
-        
+
                     `/**\n` +
                     ` * This is a very informative and thorough piece of documentation\n` +
                     ` */\n` +
@@ -162,7 +161,7 @@ describe("ordered-imports-by-path ES", () => {
                     `import OrderedPair from "app/common/ordered-pair";\n` +
                     `import Direction from "app/direction";\n` +
                     `import Monolith from "app/models/monolith";\n\n` +
-        
+
                     `/**\n` +
                     ` * This is a very informative and thorough piece of documentation\n` +
                     ` */\n` +

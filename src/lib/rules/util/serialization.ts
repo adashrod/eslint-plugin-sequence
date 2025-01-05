@@ -67,19 +67,23 @@ function helper(obj: unknown, indent: string, cache: CacheTuple[], path: string)
  * E.g.
  * let obj = {
  *     aProp: 5,
- *     meta: {
- *         name: "my object"
- *     }
+ *     name: {
+ *         first: "misc",
+ *         last: "object"
+ *     },
+ *     meta: {}
  * };
- * obj.name = obj.meta.name;
- *
+ * obj.meta.name = obj.name;
  * objectToString(obj) -->
  * {
  *     "aProp": 5,
- *     "meta": {
- *         "name": "my object"
+ *     "name": {
+ *         "first": "misc",
+ *         "last": "object"
  *     },
- *     "name": <circular> (<root>.meta.name)
+ *     "meta": {
+ *         "name": <circular> (<root>.name)
+ *     }
  * }
  *
  * @param object an object to serialize as a JSON-like string

@@ -23,16 +23,16 @@ describe("ast", () => {
             [3, tokens[2]],
             [4, tokens[2]],
             [5, null],
-            [6, null]
+            [6, null],
         ] satisfies [number, Ast.Token | null][];
         testCases.forEach(([startPos, expected]) => {
-            it(`returns ${Json.stringify(expected)} for startPos=${startPos}`, () => {
-                deepStrictEqual(findPunctuatorAfter(tokens, startPos, ","), expected);
+            it(`returns ${Json.stringify(expected)} for startPos=${startPos}`, (ctx) => {
+                deepStrictEqual(findPunctuatorAfter(tokens, startPos, ","), expected, ctx.name);
             });
         });
 
-        it("returns null if there are no tokens", () => {
-            strictEqual(findPunctuatorAfter([], 0, ","), null);
+        it("returns null if there are no tokens", (ctx) => {
+            strictEqual(findPunctuatorAfter([], 0, ","), null, ctx.name);
         });
     });
 
@@ -54,8 +54,8 @@ describe("ast", () => {
             [6, 8, null]
         ] satisfies [number, number, Ast.Token | null][];
         testCases1.forEach(([startPos, endPos, expected]) => {
-            it(`returns ${Json.stringify(expected)} for startPos=${startPos} endPos=${endPos}`, () => {
-                deepStrictEqual(findPunctuatorBetween(tokens, startPos, endPos, ","), expected);
+            it(`returns ${Json.stringify(expected)} for startPos=${startPos} endPos=${endPos}`, (ctx) => {
+                deepStrictEqual(findPunctuatorBetween(tokens, startPos, endPos, ","), expected, ctx.name);
             });
         });
 
@@ -83,13 +83,13 @@ describe("ast", () => {
             [50, 70, null],
         ] satisfies [number, number, Ast.Token | null][];
         testCases2.forEach(([startPos, endPos, expected]) => {
-            it(`returns ${Json.stringify(expected)} for startPos=${startPos} endPos=${endPos}`, () => {
-                deepStrictEqual(findPunctuatorBetween(mixedTokens, startPos, endPos, ","), expected);
+            it(`returns ${Json.stringify(expected)} for startPos=${startPos} endPos=${endPos}`, (ctx) => {
+                deepStrictEqual(findPunctuatorBetween(mixedTokens, startPos, endPos, ","), expected, ctx.name);
             });
         });
 
-        it("returns null if there are no tokens", () => {
-            strictEqual(findPunctuatorBetween([], 0, 10, ","), null);
+        it("returns null if there are no tokens", (ctx) => {
+            strictEqual(findPunctuatorBetween([], 0, 10, ","), null, ctx.name);
         });
     });
 });
