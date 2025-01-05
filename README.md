@@ -16,6 +16,8 @@ Import rules can be used on ES6+ imports, as well as TypeScript imports
 (fixable via suggestions): enforce StrictCamelCase style in identifiers, forbid LOOSECamelCase
 ### [logical-expression-complexity](https://github.com/adashrod/eslint-plugin-sequence/tree/main/src/docs/logical-expression-complexity.md)
 (*not* fixable): enforce limits on complexity of logical expressions
+### [ordered-destructuring](https://github.com/adashrod/eslint-plugin-sequence/tree/main/src/docs/ordered-destructuring.md)
+(fixable): sort keys in object destructuring statements
 
 ## Installation
 
@@ -61,6 +63,12 @@ import sequence from "eslint-plugin-sequence";
                     maxTerms: 6,
                     binaryOperators: ["==", "===", "!=", "!=="],
                     includeTernary: true
+                }
+            ],
+            "sequence/ordererd-destructuring": [
+                "error", {
+                    ignoreCase: true,
+                    natural: true
                 }
             ],
 ...
