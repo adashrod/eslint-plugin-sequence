@@ -13,7 +13,7 @@ describe("ast", () => {
         const tokens = [
             { type: "Punctuator", value: ",", range: [0, 1], loc },
             { type: "Punctuator", value: ",", range: [2, 3], loc },
-            { type: "Punctuator", value: ",", range: [4, 5], loc }
+            { type: "Punctuator", value: ",", range: [4, 5], loc },
         ] satisfies Ast.Token[];
 
         const testCases = [
@@ -41,7 +41,7 @@ describe("ast", () => {
         const tokens = [
             { type: "Punctuator", value: ",", range: [0, 1], loc },
             { type: "Punctuator", value: ",", range: [2, 3], loc },
-            { type: "Punctuator", value: ",", range: [4, 5], loc }
+            { type: "Punctuator", value: ",", range: [4, 5], loc },
         ] satisfies Ast.Token[];
 
         const testCases1 = [
@@ -51,7 +51,7 @@ describe("ast", () => {
             [3, 6, tokens[2]],
             [4, 6, tokens[2]],
             [5, 6, null],
-            [6, 8, null]
+            [6, 8, null],
         ] satisfies [number, number, Ast.Token | null][];
         testCases1.forEach(([startPos, endPos, expected]) => {
             it(`returns ${Json.stringify(expected)} for startPos=${startPos} endPos=${endPos}`, (ctx) => {

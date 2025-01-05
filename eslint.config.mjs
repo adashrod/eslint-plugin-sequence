@@ -69,10 +69,16 @@ export default [
                 allowOneCharWords: "last",
                 ignoreSingleWordsIn: ["enum_member"],
             }],
-
+            "sequence/ordered-destructuring": [
+                "error", {
+                    natural: true
+                }
+            ],
+        
             "@stylistic/ts/brace-style": ["error", "1tbs", {
                 allowSingleLine: true
             }],
+            "@stylistic/ts/comma-dangle": ["error", "always-multiline"],
             "@stylistic/ts/comma-spacing": "error",
             "@stylistic/ts/func-call-spacing": "error",
             "@stylistic/ts/indent": ["error", 4],

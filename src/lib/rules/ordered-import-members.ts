@@ -1,7 +1,7 @@
 import type { AST as Ast, Rule } from "eslint";
 import type {
     ImportDeclaration,
-    Program
+    Program,
 } from "estree";
 
 import { initializeConfig } from "@adashrodEps/lib/rules/util/eslint";
@@ -16,7 +16,7 @@ type Config = {
 
 const DEFAULT_PROPERTIES: Config = {
     ignoreCase: false,
-    sortSpecifiersWithComments: false
+    sortSpecifiersWithComments: false,
 };
 
 /**
@@ -29,7 +29,7 @@ const meta: Rule.RuleMetaData = {
     docs: {
         description: "enforce sorted members in individual imports",
         recommended: false,
-        url: "https://github.com/adashrod/eslint-plugin-sequence/tree/main/src/docs/ordered-import-members.md"
+        url: "https://github.com/adashrod/eslint-plugin-sequence/tree/main/src/docs/ordered-import-members.md",
     },
 
     schema: [{
@@ -37,22 +37,22 @@ const meta: Rule.RuleMetaData = {
         properties: {
             ignoreCase: {
                 type: "boolean",
-                default: DEFAULT_PROPERTIES.ignoreCase
+                default: DEFAULT_PROPERTIES.ignoreCase,
             },
             sortSpecifiersWithComments: {
                 type: "boolean",
-                default: DEFAULT_PROPERTIES.sortSpecifiersWithComments
-            }
+                default: DEFAULT_PROPERTIES.sortSpecifiersWithComments,
+            },
         },
-        additionalProperties: false
+        additionalProperties: false,
     }],
 
     fixable: "code",
 
     messages: {
         sortMembersAlphabetically:
-            "Sort import members alphabetically. \"{{specifierA}}\" should come before \"{{specifierB}}\"."
-    }
+            "Sort import members alphabetically. \"{{specifierA}}\" should come before \"{{specifierB}}\".",
+    },
 };
 
 function create(context: Rule.RuleContext): Rule.RuleListener {
@@ -114,7 +114,7 @@ function create(context: Rule.RuleContext): Rule.RuleListener {
                     messageId: "sortMembersAlphabetically",
                     data: {
                         specifierA: unsortedSpecifier.local.name,
-                        specifierB: beforeSpecifier.local.name
+                        specifierB: beforeSpecifier.local.name,
                     },
                     fix(fixer: Rule.RuleFixer) {
                         const specifiersHaveComments = importSpecifiers.some(specifier =>
@@ -131,10 +131,10 @@ function create(context: Rule.RuleContext): Rule.RuleListener {
                                 null;
                         }
                         return fixSimpleSpecifiers(fixer, importSpecifiers);
-                    }
+                    },
                 });
             }
-        }
+        },
     };
 }
 

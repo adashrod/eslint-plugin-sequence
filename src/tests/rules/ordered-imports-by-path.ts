@@ -8,9 +8,9 @@ import orderedImportsByPathRule from "@adashrodEps/lib/rules/ordered-imports-by-
 const esRuleTester = new RuleTester({
     languageOptions: {
         parserOptions: {
-            ecmaVersion: 6
-        }
-    }
+            ecmaVersion: 6,
+        },
+    },
 });
 
 describe("ordered-imports-by-path ES", () => {
@@ -27,17 +27,17 @@ describe("ordered-imports-by-path ES", () => {
                     code: `import { Alpha } from "Alpha";\n` +
                         `import Charlie from "Charlie";\n` +
                         `import bravo from "bravo";\n`,
-                    options: [{ignoreCase: false}]
+                    options: [{ignoreCase: false}],
                 }, {
                     code: `import { Alpha } from "Alpha";\n` +
                         `import bravo from "bravo";\n` +
                         `import Charlie from "Charlie";\n`,
-                    options: [{ignoreCase: true}]
+                    options: [{ignoreCase: true}],
                 }, {
                     code: `import { Alpha } from "Alpha";\n` +
                         `import Bravo from "Bravo";\n` +
                         `import Charlie from "Charlie";\n`,
-                    options: [{allowSeparateGroups: false}]
+                    options: [{allowSeparateGroups: false}],
                 }, {
                     code: `import { Alpha } from "Alpha";\n` +
                         `import Bravo from "Bravo";\n` +
@@ -45,19 +45,19 @@ describe("ordered-imports-by-path ES", () => {
 
                         `import Alice from "Alice";\n` +
                         `import Bob from "Bob";\n`,
-                    options: [{allowSeparateGroups: true}]
+                    options: [{allowSeparateGroups: true}],
                 }, {
                     code: `import { Alpha } from "Alpha";\n` +
                         `import Bravo from "Bravo";\n` +
                         `import "Cool-script";\n` +
                         `import Delta from "Delta";\n`,
-                    options: [{sortSideEffectsFirst: false}]
+                    options: [{sortSideEffectsFirst: false}],
                 }, {
                     code: `import "Cool-script";\n` +
                         `import { Alpha } from "Alpha";\n` +
                         `import Bravo from "Bravo";\n` +
                         `import Charlie from "Charlie";\n`,
-                    options: [{sortSideEffectsFirst: true}]
+                    options: [{sortSideEffectsFirst: true}],
                 },
                 `import { Alpha, Bravo, Charlie, Delta } from "alphabet";`,
                 `import {\n` +
@@ -89,19 +89,19 @@ describe("ordered-imports-by-path ES", () => {
                 code: `import Bravo from "Bravo";\n` +
                     `import Alpha from "Alpha";`,
                 errors: [{
-                    messageId: "sortImportsByPath"
+                    messageId: "sortImportsByPath",
                 }],
                 output: `import Alpha from "Alpha";\n` +
-                    `import Bravo from "Bravo";`
+                    `import Bravo from "Bravo";`,
             }, {
                 code: `import Bravo from "Bravo";\n` +
                     `import alphaFun from "alphaFun";`,
                 options: [{ignoreCase: true}],
                 errors: [{
-                    messageId: "sortImportsByPath"
+                    messageId: "sortImportsByPath",
                 }],
                 output: `import alphaFun from "alphaFun";\n` +
-                    `import Bravo from "Bravo";`
+                    `import Bravo from "Bravo";`,
             }, {
                 code: `import { Alpha } from "Alpha";\n` +
                     `import Bravo from "Bravo";\n` +
@@ -111,13 +111,13 @@ describe("ordered-imports-by-path ES", () => {
                     `import Bob from "Bob";\n`,
                 options: [{allowSeparateGroups: false}],
                 errors: [{
-                    messageId: "sortImportsByPath"
+                    messageId: "sortImportsByPath",
                 }],
                 output: `import Alice from "Alice";\n` +
                     `import { Alpha } from "Alpha";\n` +
                     `import Bob from "Bob";\n` +
                     `import Bravo from "Bravo";\n` +
-                    `import Charlie from "Charlie";\n`
+                    `import Charlie from "Charlie";\n`,
             }, {
                 code: `import { Alpha } from "Alpha";\n` +
                     `import Bravo from "Bravo";\n` +
@@ -125,12 +125,12 @@ describe("ordered-imports-by-path ES", () => {
                     `import Delta from "Delta";\n`,
                 options: [{sortSideEffectsFirst: true}],
                 errors: [{
-                    messageId: "sortSideEffectsFirst"
+                    messageId: "sortSideEffectsFirst",
                 }],
                 output: `import "Cool-script";\n` +
                     `import { Alpha } from "Alpha";\n` +
                     `import Bravo from "Bravo";\n` +
-                    `import Delta from "Delta";\n`
+                    `import Delta from "Delta";\n`,
             }, {
                 code: `import "Cool-script";\n` +
                     `import { Alpha } from "Alpha";\n` +
@@ -138,12 +138,12 @@ describe("ordered-imports-by-path ES", () => {
                     `import Delta from "Delta";\n`,
                 options: [{sortSideEffectsFirst: false}],
                 errors: [{
-                    messageId: "sortImportsByPath"
+                    messageId: "sortImportsByPath",
                 }],
                 output: `import { Alpha } from "Alpha";\n` +
                     `import Bravo from "Bravo";\n` +
                     `import "Cool-script";\n` +
-                    `import Delta from "Delta";\n`
+                    `import Delta from "Delta";\n`,
             }, {
                 code: `import BinarySearch from "app/algorithms/binary-search";\n` +
                     `import OrderedPair from "app/common/ordered-pair";\n` +
@@ -155,7 +155,7 @@ describe("ordered-imports-by-path ES", () => {
                     ` */\n` +
                     `class Application {}`,
                 errors: [{
-                    messageId: "sortImportsByPath"
+                    messageId: "sortImportsByPath",
                 }],
                 output: `import BinarySearch from "app/algorithms/binary-search";\n` +
                     `import OrderedPair from "app/common/ordered-pair";\n` +
@@ -165,16 +165,16 @@ describe("ordered-imports-by-path ES", () => {
                     `/**\n` +
                     ` * This is a very informative and thorough piece of documentation\n` +
                     ` */\n` +
-                    `class Application {}`
-            }]
+                    `class Application {}`,
+            }],
         });
     });
 });
 
 const tsRuleTester = new RuleTester({
     languageOptions: {
-        parser: { parse }
-    }
+        parser: { parse },
+    },
 });
 
 describe("ordered-imports-by-path TS", () => {
@@ -183,36 +183,36 @@ describe("ordered-imports-by-path TS", () => {
             valid: [{
                 code: `import { ArrayList } from "Collections";\n` +
                     `import type { List } from "Collections";\n`,
-                options: [{sortTypeImportsFirst: false}]
+                options: [{sortTypeImportsFirst: false}],
             }, {
                 code: `import type { List } from "Collections";\n` +
                     `import { ArrayList } from "Collections";\n`,
-                options: [{sortTypeImportsFirst: true}]
+                options: [{sortTypeImportsFirst: true}],
             },
             `import { ArrayList } from "Collections";\n` +
                 `import type { List } from "Collections";\n`,
             `import type { List } from "Collections";\n` +
-                `import { ArrayList } from "Collections";\n`
+                `import { ArrayList } from "Collections";\n`,
             ],
             invalid: [{
                 code: `import type { List } from "Collections";\n` +
                     `import { ArrayList } from "Collections";\n`,
                 options: [{sortTypeImportsFirst: false}],
                 errors: [{
-                    messageId: "sortTypeImports"
+                    messageId: "sortTypeImports",
                 }],
                 output: `import { ArrayList } from "Collections";\n` +
-                    `import type { List } from "Collections";\n`
+                    `import type { List } from "Collections";\n`,
             }, {
                 code: `import { ArrayList } from "Collections";\n` +
                     `import type { List } from "Collections";\n`,
                 options: [{sortTypeImportsFirst: true}],
                 errors: [{
-                    messageId: "sortTypeImports"
+                    messageId: "sortTypeImports",
                 }],
                 output: `import type { List } from "Collections";\n` +
-                    `import { ArrayList } from "Collections";\n`
-            }]
+                    `import { ArrayList } from "Collections";\n`,
+            }],
         });
     });
 });

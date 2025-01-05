@@ -6,7 +6,7 @@ import type {
     Expression,
     LogicalExpression,
     PrivateIdentifier,
-    UnaryExpression
+    UnaryExpression,
 } from "estree";
 
 import { initializeConfig } from "@adashrodEps/lib/rules/util/eslint";
@@ -23,7 +23,7 @@ enum BinaryOperatorAsEnum {
     LESS_THAN = "<",
     LESS_THAN_EQUAL = "<=",
     GREATER_THAN = ">",
-    GREATER_THAN_EQUAL = ">="
+    GREATER_THAN_EQUAL = ">=",
 }
 
 type Config = {
@@ -37,7 +37,7 @@ const DEFAULT_PROPERTIES: Config = {
     maxHeight: 2,
     maxTerms: 4,
     binaryOperators: [],
-    includeTernary: true
+    includeTernary: true,
 };
 
 /**
@@ -51,7 +51,7 @@ const meta: Rule.RuleMetaData = {
         description: "enforce complexity limits on logical expressions",
         recommended: false,
         url:
-            "https://github.com/adashrod/eslint-plugin-sequence/tree/main/src/docs/logical-expression-complexity.md"
+            "https://github.com/adashrod/eslint-plugin-sequence/tree/main/src/docs/logical-expression-complexity.md",
     },
 
     schema: [{
@@ -59,11 +59,11 @@ const meta: Rule.RuleMetaData = {
         properties: {
             maxHeight: {
                 type: "number",
-                default: DEFAULT_PROPERTIES.maxHeight
+                default: DEFAULT_PROPERTIES.maxHeight,
             },
             maxTerms: {
                 type: "number",
-                default: DEFAULT_PROPERTIES.maxTerms
+                default: DEFAULT_PROPERTIES.maxTerms,
             },
             binaryOperators: {
                 type: "array",
@@ -76,25 +76,25 @@ const meta: Rule.RuleMetaData = {
                         BinaryOperatorAsEnum.LESS_THAN,
                         BinaryOperatorAsEnum.LESS_THAN_EQUAL,
                         BinaryOperatorAsEnum.GREATER_THAN,
-                        BinaryOperatorAsEnum.GREATER_THAN_EQUAL
-                    ]
+                        BinaryOperatorAsEnum.GREATER_THAN_EQUAL,
+                    ],
                 },
                 minItems: 0,
                 uniqueItems: true,
-                default: DEFAULT_PROPERTIES.binaryOperators
+                default: DEFAULT_PROPERTIES.binaryOperators,
             },
             includeTernary: {
                 type: "boolean",
-                default: DEFAULT_PROPERTIES.includeTernary
-            }
+                default: DEFAULT_PROPERTIES.includeTernary,
+            },
         },
-        additionalProperties: false
+        additionalProperties: false,
     }],
 
     messages: {
         tooTall: "Expression height is {{height}}; max allowed is {{maxAllowed}}",
-        tooManyTerms: "Expression has {{numTerms}} terms; max allowed is {{maxAllowed}}"
-    }
+        tooManyTerms: "Expression has {{numTerms}} terms; max allowed is {{maxAllowed}}",
+    },
 };
 
 function create(context: Rule.RuleContext): Rule.RuleListener {
@@ -185,8 +185,8 @@ function create(context: Rule.RuleContext): Rule.RuleListener {
                         messageId: "tooTall",
                         data: {
                             height: expressionHeight.toString(),
-                            maxAllowed: cfg.maxHeight.toString()
-                        }
+                            maxAllowed: cfg.maxHeight.toString(),
+                        },
                     });
                 }
             }
@@ -198,12 +198,12 @@ function create(context: Rule.RuleContext): Rule.RuleListener {
                         messageId: "tooManyTerms",
                         data: {
                             numTerms: numExpressionTerms.toString(),
-                            maxAllowed: cfg.maxTerms.toString()
-                        }
+                            maxAllowed: cfg.maxTerms.toString(),
+                        },
                     });
                 }
             }
-        }
+        },
     };
 }
 

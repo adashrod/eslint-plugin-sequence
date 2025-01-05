@@ -65,7 +65,7 @@ import sequence from "eslint-plugin-sequence";
                     includeTernary: true
                 }
             ],
-            "sequence/ordererd-destructuring": [
+            "sequence/ordered-destructuring": [
                 "error", {
                     ignoreCase: true,
                     natural: true

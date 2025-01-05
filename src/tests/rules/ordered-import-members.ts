@@ -8,9 +8,9 @@ import orderedImportMembersRule from "@adashrodEps/lib/rules/ordered-import-memb
 const esRuleTester = new RuleTester({
     languageOptions: {
         parserOptions: {
-            ecmaVersion: 6
-        }
-    }
+            ecmaVersion: 6,
+        },
+    },
 });
 
 describe("ordered-import-members ES", () => {
@@ -21,7 +21,7 @@ describe("ordered-import-members ES", () => {
                 `import { Alpha, Bravo, Charlie, } from "alphabet";`,
                 {
                     code: `import { Alpha, bravoFun, Charlie } from "stuff";\n`,
-                    options: [{ignoreCase: true}]
+                    options: [{ignoreCase: true}],
                 },
                 `import { Alpha, Bravo, Charlie, Delta } from "alphabet";`,
                 `import {\n` +
@@ -52,22 +52,22 @@ describe("ordered-import-members ES", () => {
             invalid: [{
                 code: `import { Bravo, Alpha } from "alphabet";`,
                 errors: [{
-                    messageId: "sortMembersAlphabetically"
+                    messageId: "sortMembersAlphabetically",
                 }],
-                output: `import { Alpha, Bravo } from "alphabet";`
+                output: `import { Alpha, Bravo } from "alphabet";`,
             }, {
                 code: `import { Bravo, Alpha, } from "alphabet";`,
                 errors: [{
-                    messageId: "sortMembersAlphabetically"
+                    messageId: "sortMembersAlphabetically",
                 }],
-                output: `import { Alpha, Bravo, } from "alphabet";`
+                output: `import { Alpha, Bravo, } from "alphabet";`,
             }, {
                 code: `import { Delta, Echo, Foxtrot, alphaFun, bravoFun, charlieFun } from "alphabet";`,
                 options: [{ignoreCase: true}],
                 errors: [{
-                    messageId: "sortMembersAlphabetically"
+                    messageId: "sortMembersAlphabetically",
                 }],
-                output: `import { alphaFun, bravoFun, charlieFun, Delta, Echo, Foxtrot } from "alphabet";`
+                output: `import { alphaFun, bravoFun, charlieFun, Delta, Echo, Foxtrot } from "alphabet";`,
             }, {
                 code: `import {\n` +
                     `Bravo, // second letter\n` +
@@ -76,8 +76,8 @@ describe("ordered-import-members ES", () => {
                     `Charlie } from "alphabet";`,
                 options: [{sortSpecifiersWithComments: false}],
                 errors: [{
-                    messageId: "sortMembersAlphabetically"
-                }]
+                    messageId: "sortMembersAlphabetically",
+                }],
             }, {
                 code: `import {\n` +
                     `Bravo, // second letter\n` +
@@ -86,13 +86,13 @@ describe("ordered-import-members ES", () => {
                     `Charlie } from "alphabet";`,
                 options: [{sortSpecifiersWithComments: true}],
                 errors: [{
-                    messageId: "sortMembersAlphabetically"
+                    messageId: "sortMembersAlphabetically",
                 }],
                 output: `import {\n` +
                     `Bravo, // second letter\n` +
                     `Charlie, Delta,\n` +
                     `// Alpha,\n` +
-                    `} from "alphabet";`
+                    `} from "alphabet";`,
             }, {
                 code: `import {\n` +
                     `Bravo, // second letter\n` +
@@ -101,20 +101,20 @@ describe("ordered-import-members ES", () => {
                     `Charlie, } from "alphabet";`,
                 options: [{sortSpecifiersWithComments: true}],
                 errors: [{
-                    messageId: "sortMembersAlphabetically"
+                    messageId: "sortMembersAlphabetically",
                 }],
                 output: `import {\n` +
                     `Bravo, // second letter\n` +
                     `Charlie, Delta,\n` +
                     `// Alpha,\n` +
-                    `} from "alphabet";`
+                    `} from "alphabet";`,
             }, {
                 code: `import { Echo, Bravo, /* Charlie, Delta,*/ Alpha } from "alphabet";`,
                 options: [{sortSpecifiersWithComments: true}],
                 errors: [{
-                    messageId: "sortMembersAlphabetically"
+                    messageId: "sortMembersAlphabetically",
                 }],
-                output: `import { Alpha, Bravo, /* Charlie, Delta,*/ Echo, } from "alphabet";`
+                output: `import { Alpha, Bravo, /* Charlie, Delta,*/ Echo, } from "alphabet";`,
             }, {
                 code: `import util, {\n` +
                     `/* Charlie,\n` +
@@ -124,13 +124,13 @@ describe("ordered-import-members ES", () => {
                     `Alpha } from "alphabet";`,
                 options: [{sortSpecifiersWithComments: true}],
                 errors: [{
-                    messageId: "sortMembersAlphabetically"
+                    messageId: "sortMembersAlphabetically",
                 }],
                 output: `import util, {\n` +
                     `/* Charlie,\n` +
                     `Delta,*/\n` +
                     `Alpha, Bravo,\n` +
-                    `Echo,\n} from "alphabet";`
+                    `Echo,\n} from "alphabet";`,
             }, {
                 code: `import {\n` +
                     `// Alpha,\n` +
@@ -140,23 +140,23 @@ describe("ordered-import-members ES", () => {
                     `Bravo } from "alphabet";`,
                 options: [{sortSpecifiersWithComments: true}],
                 errors: [{
-                    messageId: "sortMembersAlphabetically"
+                    messageId: "sortMembersAlphabetically",
                 }],
                 output: `import {\n` +
                     `// Alpha,\n` +
                     `Bravo, Echo,\n` +
                     `/* Charlie,\n` +
                     `Delta,*/\n` +
-                    `} from "alphabet";`
-            }]
+                    `} from "alphabet";`,
+            }],
         });
     });
 });
 
 const tsRuleTester = new RuleTester({
     languageOptions: {
-        parser: { parse }
-    }
+        parser: { parse },
+    },
 });
 
 describe("ordered-import-members TS", () => {
@@ -167,11 +167,11 @@ describe("ordered-import-members TS", () => {
                 code: `import type { OnInit } from "@angular/core";\n` +
                     `import { ElementRef, HostListener, Directive, Input } from "@angular/core";`,
                 errors: [{
-                    messageId: "sortMembersAlphabetically"
+                    messageId: "sortMembersAlphabetically",
                 }],
                 output: `import type { OnInit } from "@angular/core";\n` +
-                    `import { Directive, ElementRef, HostListener, Input } from "@angular/core";`
-            }]
+                    `import { Directive, ElementRef, HostListener, Input } from "@angular/core";`,
+            }],
         });
     });
 });

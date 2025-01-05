@@ -14,7 +14,7 @@ const DEFAULT_PROPERTIES: Config = {
     ignoreCase: false,
     allowSeparateGroups: true,
     sortSideEffectsFirst: false,
-    sortTypeImportsFirst: undefined
+    sortTypeImportsFirst: undefined,
 };
 
 /**
@@ -28,7 +28,7 @@ const meta: Rule.RuleMetaData = {
         description:
             "enforce sorted import declarations, sorting imports by path",
         recommended: false,
-        url: "https://github.com/adashrod/eslint-plugin-sequence/tree/main/src/docs/ordered-imports-by-path.md"
+        url: "https://github.com/adashrod/eslint-plugin-sequence/tree/main/src/docs/ordered-imports-by-path.md",
     },
 
     schema: [{
@@ -36,22 +36,22 @@ const meta: Rule.RuleMetaData = {
         properties: {
             ignoreCase: {
                 type: "boolean",
-                default: DEFAULT_PROPERTIES.ignoreCase
+                default: DEFAULT_PROPERTIES.ignoreCase,
             },
             allowSeparateGroups: {
                 type: "boolean",
-                default: DEFAULT_PROPERTIES.allowSeparateGroups
+                default: DEFAULT_PROPERTIES.allowSeparateGroups,
             },
             sortSideEffectsFirst: {
                 type: "boolean",
-                default: DEFAULT_PROPERTIES.sortSideEffectsFirst
+                default: DEFAULT_PROPERTIES.sortSideEffectsFirst,
             },
             sortTypeImportsFirst: {
                 type: "boolean",
-                default: DEFAULT_PROPERTIES.sortTypeImportsFirst
-            }
+                default: DEFAULT_PROPERTIES.sortTypeImportsFirst,
+            },
         },
-        additionalProperties: false
+        additionalProperties: false,
     }],
 
     fixable: "code",
@@ -64,7 +64,7 @@ const meta: Rule.RuleMetaData = {
         sortTypeImports:
             "Type imports should be sorted {{typeStyle}} value imports. " +
             "`{{declarationA}}` should come before `{{declarationB}}`",
-    }
+    },
 };
 
 type TypeCapableImportDeclaration = ImportDeclaration & {
@@ -282,7 +282,7 @@ function create(context: Rule.RuleContext): Rule.RuleListener {
                     data: {
                         declarationA: nameA,
                         declarationB: nameB,
-                        typeStyle
+                        typeStyle,
                     },
                     fix(fixer: Rule.RuleFixer) {
                         if (importGroup.some(d => !d.range)) {
@@ -307,12 +307,12 @@ function create(context: Rule.RuleContext): Rule.RuleListener {
                             .join("\n");
                         return fixer.replaceTextRange([importGroup[0].range![0], originalLastImport.range![1]],
                             replacementText);
-                    }
+                    },
                 });
             }
 
             previousDeclaration = node;
-        }
+        },
     };
 }
 

@@ -5,7 +5,7 @@ import type {
     ImportSpecifier,
     PrivateIdentifier,
     PropertyDefinition,
-    VariableDeclaration
+    VariableDeclaration,
 } from "estree";
 import console from "node:console";
 
@@ -19,7 +19,7 @@ import {
     isMixedSnakeCase,
     isUpper,
     tokenizeMixedSnakeCase,
-    tokenizePotentiallyInvalidCamelCase
+    tokenizePotentiallyInvalidCamelCase,
 } from "@adashrodEps/lib/rules/util/strings";
 
 /**
@@ -30,14 +30,14 @@ import {
 enum AllowOneCharWords {
     NEVER = "never",
     ALWAYS = "always",
-    LAST = "last"
+    LAST = "last",
 }
 
 enum IgnoreSingleWordsIn {
     ENUM_MEMBER = "enum_member",
     FIRST_CLASS_CONSTANT = "first_class_constant",
     OBJECT_FIELD = "object_field",
-    STATIC_CLASS_FIELD = "static_class_field"
+    STATIC_CLASS_FIELD = "static_class_field",
 }
 
 type Config = {
@@ -51,7 +51,7 @@ const DEFAULT_PROPERTIES: Config = {
     ignoreImports: false,
     ignoredIdentifiers: [],
     allowOneCharWords: AllowOneCharWords.NEVER,
-    ignoreSingleWordsIn: []
+    ignoreSingleWordsIn: [],
 };
 
 const meta: Rule.RuleMetaData = {
@@ -60,7 +60,7 @@ const meta: Rule.RuleMetaData = {
     docs: {
         description: "enforce strict camel case, i.e. no all-caps tokens, words, or acronyms in identifiers",
         recommended: false,
-        url: "https://github.com/adashrod/eslint-plugin-sequence/tree/main/src/docs/strict-camel-case.md"
+        url: "https://github.com/adashrod/eslint-plugin-sequence/tree/main/src/docs/strict-camel-case.md",
     },
 
     schema: [{
@@ -68,25 +68,25 @@ const meta: Rule.RuleMetaData = {
         properties: {
             ignoreImports: {
                 type: "boolean",
-                default: DEFAULT_PROPERTIES.ignoreImports
+                default: DEFAULT_PROPERTIES.ignoreImports,
             },
             ignoredIdentifiers: {
                 type: "array",
                 items: [{
-                    type: "string"
+                    type: "string",
                 }],
                 minItems: 0,
                 uniqueItems: true,
-                default: DEFAULT_PROPERTIES.ignoredIdentifiers
+                default: DEFAULT_PROPERTIES.ignoredIdentifiers,
             },
             allowOneCharWords: {
                 type: "string",
                 enum: [
                     AllowOneCharWords.NEVER,
                     AllowOneCharWords.ALWAYS,
-                    AllowOneCharWords.LAST
+                    AllowOneCharWords.LAST,
                 ],
-                default: DEFAULT_PROPERTIES.allowOneCharWords
+                default: DEFAULT_PROPERTIES.allowOneCharWords,
             },
             ignoreSingleWordsIn: {
                 type: "array",
@@ -95,15 +95,15 @@ const meta: Rule.RuleMetaData = {
                         IgnoreSingleWordsIn.ENUM_MEMBER,
                         IgnoreSingleWordsIn.FIRST_CLASS_CONSTANT,
                         IgnoreSingleWordsIn.OBJECT_FIELD,
-                        IgnoreSingleWordsIn.STATIC_CLASS_FIELD
-                    ]
+                        IgnoreSingleWordsIn.STATIC_CLASS_FIELD,
+                    ],
                 },
                 minItems: 0,
                 uniqueItems: true,
-                default: DEFAULT_PROPERTIES.ignoreSingleWordsIn
-            }
+                default: DEFAULT_PROPERTIES.ignoreSingleWordsIn,
+            },
         },
-        additionalProperties: false
+        additionalProperties: false,
     }],
 
     hasSuggestions: true,
@@ -118,8 +118,8 @@ const meta: Rule.RuleMetaData = {
         notCamelCasePrivateNoSuggestion:
             `Private member "#{{name}}" is not in strict camel case, no suggestion possible for 1-char words.` +
             `{{debug}}`,
-        suggestionMessage: `Replace "{{name}}" with "{{suggestion}}"`
-    }
+        suggestionMessage: `Replace "{{name}}" with "{{suggestion}}"`,
+    },
 };
 
 enum LogLevel {
@@ -129,7 +129,7 @@ enum LogLevel {
     WARN = "WARN",
     INFO = "INFO",
     DEBUG = "DEBUG",
-    TRACE = "TRACE"
+    TRACE = "TRACE",
 }
 
 const ORDERED_LOG_LEVELS = [
@@ -139,7 +139,7 @@ const ORDERED_LOG_LEVELS = [
     LogLevel.WARN,
     LogLevel.INFO,
     LogLevel.DEBUG,
-    LogLevel.TRACE
+    LogLevel.TRACE,
 ];
 
 function create(context: Rule.RuleContext): Rule.RuleListener {
@@ -273,7 +273,7 @@ function create(context: Rule.RuleContext): Rule.RuleListener {
         const joined = tokens.join("");
         return {
             suggestion: ![s, ""].includes(joined)  ? joined : null,
-            valid
+            valid,
         };
     }
 
@@ -345,33 +345,33 @@ function create(context: Rule.RuleContext): Rule.RuleListener {
             data: {
                 name: node.name,
                 suggestion: suggestion ?? "",
-                debug: isLogLevelEnabled(LogLevel.DEBUG) ? ` (${debugMsg} ${buildNodePath(nodeWithParent)})` : ""
+                debug: isLogLevelEnabled(LogLevel.DEBUG) ? ` (${debugMsg} ${buildNodePath(nodeWithParent)})` : "",
             },
             suggest: suggestion !== null ? [{
                 messageId: "suggestionMessage",
                 data: {
                     name: node.name,
-                    suggestion: suggestion ?? ""
+                    suggestion: suggestion ?? "",
                 },
                 fix(fixer: Rule.RuleFixer): Rule.Fix {
                     return fixer.replaceTextRange(node.range!, optionalPrivatePrefix + suggestion);
-                }
-            }] : null
+                },
+            }] : null,
         });
     }
 
     function checkDeclarations(node: Rule.Node, singleWordExemptionType?: IgnoreSingleWordsIn): void {
         for (const variable of sourceCode.getDeclaredVariables(node)) { // funcName+params, mult var decl in one stmt
             log(LogLevel.DEBUG, `*Declaration checking variable.name=${variable.name}`);
-            const response = checkValidityAndGetSuggestion(variable.name,
+            const { suggestion, valid } = checkValidityAndGetSuggestion(variable.name,
                 cfg.ignoreSingleWordsIn.includes(singleWordExemptionType as IgnoreSingleWordsIn));
-            if (response.valid) {
+            if (valid) {
                 log(LogLevel.TRACE, `*Declaration: PASS variable.name=${variable.name}`);
                 continue;
             }
             const identifier = variable.identifiers[0];
             log(LogLevel.TRACE, () => [`*Declaration: reporting variable ${variable.name}`, objectToString(variable)]);
-            report(identifier, response.suggestion, "*Declaration:");
+            report(identifier, suggestion, "*Declaration:");
 
             // references to vars after declaration
             for (const reference of variable.references) {
@@ -384,7 +384,7 @@ function create(context: Rule.RuleContext): Rule.RuleListener {
                 log(LogLevel.TRACE, () => [
                     `*Declaration: reporting reference ${variable.name}`,
                     objectToString(reference)]);
-                report(reference.identifier, response.suggestion, "*Declaration reference:");
+                report(reference.identifier, suggestion, "*Declaration reference:");
             }
         }
     }
@@ -398,11 +398,11 @@ function create(context: Rule.RuleContext): Rule.RuleListener {
             return;
         }
         log(LogLevel.DEBUG, `class/object field/method declarations checking ${node.name}`);
-        const response = checkValidityAndGetSuggestion(node.name,
+        const { suggestion, valid } = checkValidityAndGetSuggestion(node.name,
             cfg.ignoreSingleWordsIn.includes(singleWordExemptionType as IgnoreSingleWordsIn));
-        if (!response.valid) {
+        if (!valid) {
             log(LogLevel.TRACE, () => [`Field/method declarations reporting ${node.name}`, objectToString(node)]);
-            report(node, response.suggestion, "Field/method declarations");
+            report(node, suggestion, "Field/method declarations");
         } else {
             log(LogLevel.TRACE, `field/method declarations: PASS node.name=${node.name}`);
         }
@@ -426,8 +426,8 @@ function create(context: Rule.RuleContext): Rule.RuleListener {
         if (!cfg.ignoreImports) {
             for (const variable of sourceCode.getDeclaredVariables(node)) {
                 log(LogLevel.DEBUG, `ImportDeclaration checking ${variable.name}`);
-                const response = checkValidityAndGetSuggestion(variable.name);
-                if (response.valid) {
+                const { suggestion, valid } = checkValidityAndGetSuggestion(variable.name);
+                if (valid) {
                     log(LogLevel.TRACE, `ImportDeclaration: PASS variable.name=${variable.name}`);
                     continue;
                 }
@@ -436,13 +436,13 @@ function create(context: Rule.RuleContext): Rule.RuleListener {
                 if (["ImportDefaultSpecifier", "ImportNamespaceSpecifier"].includes(identifier.parent.type)) {
                     log(LogLevel.TRACE, () => [
                         `ImportDefaultSpecifier/ImportNamespaceSpecifier reporting ${variable.name}`,
-                        objectToString(identifier)
+                        objectToString(identifier),
                     ]);
-                    report(identifier, response.suggestion, "ImportDefaultSpec/ImportNamespaceSpecifier");
+                    report(identifier, suggestion, "ImportDefaultSpec/ImportNamespaceSpecifier");
                 } else if (badlyAliasedImport(identifier)) {
                     log(LogLevel.TRACE, () => [`ImportDeclaration reporting named import ${variable.name}`,
                         objectToString(identifier)]);
-                    report(identifier, response.suggestion, "Import");
+                    report(identifier, suggestion, "Import");
                 } else {
                     // for non-renamed non-default imports (`import { htmlToXML } from "..."`),
                     // identifier === identifier.parent.imported
@@ -454,7 +454,7 @@ function create(context: Rule.RuleContext): Rule.RuleListener {
                     log(LogLevel.TRACE, () => [
                         `ImportDeclaration reporting ${variable.name}`,
                         objectToString(reference)]);
-                    report(reference.identifier, response.suggestion, "ImportDeclaration reference");
+                    report(reference.identifier, suggestion, "ImportDeclaration reference");
                 }
             }
         }
@@ -462,10 +462,10 @@ function create(context: Rule.RuleContext): Rule.RuleListener {
 
     function checkSimpleNodeName(node: Identifier & Rule.NodeParentExtension): void {
         log(LogLevel.DEBUG, `export/label/nodeName checking ${node.name}`);
-        const response = checkValidityAndGetSuggestion(node.name);
-        if (!response.valid) {
+        const { suggestion, valid } = checkValidityAndGetSuggestion(node.name);
+        if (!valid) {
             log(LogLevel.TRACE, () => [`export/label/nodeName reporting ${node.name}`, objectToString(node)]);
-            report(node, response.suggestion, "export/label/break/continue/nodeName");
+            report(node, suggestion, "export/label/break/continue/nodeName");
         } else {
             log(LogLevel.TRACE, `export/label/nodeName: PASS ${node.name}`);
         }

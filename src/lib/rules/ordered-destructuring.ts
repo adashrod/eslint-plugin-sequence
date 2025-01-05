@@ -22,7 +22,7 @@ type Config = {
 
 const DEFAULT_PROPERTIES: Config = {
     ignoreCase: false,
-    natural: false
+    natural: false,
 };
 
 const meta: Rule.RuleMetaData = {
@@ -31,7 +31,7 @@ const meta: Rule.RuleMetaData = {
     docs: {
         description: "enforce sorted properties in object patterns",
         recommended: false,
-        url: "https://github.com/adashrod/eslint-plugin-sequence/tree/main/src/docs/ordered-destructuring.md"
+        url: "https://github.com/adashrod/eslint-plugin-sequence/tree/main/src/docs/ordered-destructuring.md",
     },
 
     schema: [{
@@ -39,21 +39,21 @@ const meta: Rule.RuleMetaData = {
         properties: {
             ignoreCase: {
                 type: "boolean",
-                default: DEFAULT_PROPERTIES.ignoreCase
+                default: DEFAULT_PROPERTIES.ignoreCase,
             },
             natural: {
                 type: "boolean",
-                default: DEFAULT_PROPERTIES.natural
-            }
+                default: DEFAULT_PROPERTIES.natural,
+            },
         },
-        additionalProperties: false
+        additionalProperties: false,
     }],
 
     fixable: "code",
 
     messages: {
-        sortPropsInObjectPattern: `{{next}} should come before {{current}}`
-    }
+        sortPropsInObjectPattern: `{{next}} should come before {{current}}`,
+    },
 };
 
 function create(context: Rule.RuleContext): Rule.RuleListener {
@@ -105,7 +105,7 @@ function create(context: Rule.RuleContext): Rule.RuleListener {
                         messageId: "sortPropsInObjectPattern",
                         data: {
                             current: currentExpression.name,
-                            next: nextExpression.name
+                            next: nextExpression.name,
                         },
                         loc: node.loc!,
                         fix: (fixer: Rule.RuleFixer): Rule.Fix | null =>
@@ -116,7 +116,7 @@ function create(context: Rule.RuleContext): Rule.RuleListener {
                                     programTokens,
                                     context.sourceCode,
                                     sortConfig) :
-                                null
+                                null,
                     });
                 }
             }

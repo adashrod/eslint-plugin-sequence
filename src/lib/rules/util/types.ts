@@ -1,7 +1,7 @@
 import type {
     ImportDefaultSpecifier,
     ImportNamespaceSpecifier,
-    ImportSpecifier
+    ImportSpecifier,
 } from "estree";
 
 /**

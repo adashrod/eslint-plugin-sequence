@@ -14,7 +14,7 @@ import {
     isUpper,
     stringCompare,
     tokenizeMixedSnakeCase,
-    tokenizePotentiallyInvalidCamelCase
+    tokenizePotentiallyInvalidCamelCase,
 } from "@adashrodEps/lib/rules/util/strings";
 
 describe("strings", () => {
@@ -79,7 +79,7 @@ describe("strings", () => {
             "ABC",
             "HELLO",
             "WORLD",
-            "XYZ"
+            "XYZ",
         ].forEach(s => {
             it(`returns true for ${s}`, (ctx) => {
                 strictEqual(isAllCaps(s), true, ctx.name);
@@ -93,7 +93,7 @@ describe("strings", () => {
             "world",
             "Hello",
             "World",
-            "Xyz"
+            "Xyz",
         ].forEach(s =>
             it(`returns false for ${s}`, (ctx) => {
                 strictEqual(isAllCaps(s), false, ctx.name);
@@ -110,7 +110,7 @@ describe("strings", () => {
             "AB4C",
             "H5ELLO",
             "WO5RLD",
-            "XYZ2"
+            "XYZ2",
         ].forEach(s => {
             it(`returns true for ${s}`, (ctx) => {
                 strictEqual(isAllCapsAndDigits(s), true, ctx.name);
@@ -131,7 +131,7 @@ describe("strings", () => {
             "wor3ld",
             "He7llo",
             "Wo9rld",
-            "X0yz"
+            "X0yz",
         ].forEach(s =>
             it(`returns false for ${s}`, (ctx) => {
                 strictEqual(isAllCapsAndDigits(s), false, ctx.name);
@@ -143,7 +143,7 @@ describe("strings", () => {
         [
             ["aoeu", "Aoeu"],
             ["hello", "Hello"],
-            ["World", "World"]
+            ["World", "World"],
         ].forEach(([before, after]) =>
             it(`returns ${after} for ${before}`, (ctx) => {
                 strictEqual(capitalize(before), after, ctx.name);
@@ -168,7 +168,7 @@ describe("strings", () => {
             ["_hello_", ["_hello_"]],
             ["_helloWorld_", ["_hello", "World_"]],
             ["_HelloWorld_", ["_", "Hello", "World_"]],
-            ["_HelloWorld", ["_", "Hello", "World"]]
+            ["_HelloWorld", ["_", "Hello", "World"]],
         ] satisfies [string, string[]][];
         testCases.forEach(([s, result]) =>
             it(`returns ${result} for ${s}`, (ctx) => {
@@ -201,7 +201,7 @@ describe("strings", () => {
             "HELLO_WORLD",
             "HELLO_WORLD_123",
             "HELLO_WORLD_123_456C",
-            "HELLO_WORLD_123A_456B_789"
+            "HELLO_WORLD_123A_456B_789",
         ].forEach(s => {
             it(`returns true for ${s}`, (ctx) => {
                 strictEqual(isAllCapsSnakeCase(s), true, ctx.name);
@@ -213,7 +213,7 @@ describe("strings", () => {
             "HELLO_WORLd_123",
             "HelloWorld",
             "hello_world",
-            "HELLO"
+            "HELLO",
         ].forEach(s =>
             it(`returns false for ${s}`, (ctx) => {
                 strictEqual(isAllCapsSnakeCase(s), false, ctx.name);
@@ -241,7 +241,7 @@ describe("strings", () => {
         [
             "HelloWorld",
             "helloWorld",
-            "hello"
+            "hello",
         ].forEach(s =>
             it(`returns false for ${s}`, (ctx) => {
                 strictEqual(isMixedSnakeCase(s), false, ctx.name);

@@ -22,5 +22,5 @@ export const rules = {
     "ordered-destructuring": orderedDestructuring,
     "ordered-import-members": orderedImportMembers,
     "ordered-imports-by-path": orderedImportsByPath,
-    "strict-camel-case": strictCamelCase
+    "strict-camel-case": strictCamelCase,
 };

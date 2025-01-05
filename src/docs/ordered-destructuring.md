@@ -28,7 +28,7 @@ function post({method, headers, body}) {
 example configuration:
 ```javascript
 "rules": {
-    "sequence/ordererd-destructuring": [
+    "sequence/ordered-destructuring": [
         "error", {
             ignoreCase: true,
             natural: true
