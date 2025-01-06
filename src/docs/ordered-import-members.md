@@ -36,12 +36,14 @@ type: `boolean`
 
 default: `false`
 
-`false`: sorting is case-sensitive; uppercase letters sort before lowercase, e.g. `import { "A", "D", "E", "b", "c" } from "letters";`
+`false`: sorting is case-sensitive; uppercase letters sort before lowercase, e.g. `import { A, D, E, b, c } from "letters";`
 
-`true`: sorting is done in a case-insensitive manner, e.g. `import { "A", "b", "c", "D", "E" } from "letters";`
+`true`: sorting is done in a case-insensitive manner, e.g. `import { A, b, c, D, E } from "letters";`
 
-## sortSpecifiersWithComments
+## sortSpecifiersWithComments (deprecated)
 -----------------------------
+
+#### This configuration will be removed in a future release and treated as always `true`.
 
 type: `boolean`
 
