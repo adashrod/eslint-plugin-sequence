@@ -3,6 +3,7 @@ import js from "@eslint/js";
 import stylistic from "@stylistic/eslint-plugin-ts";
 import typescriptEslint from "@typescript-eslint/eslint-plugin";
 import tsParser from "@typescript-eslint/parser";
+import noRelativeImportPaths from "eslint-plugin-no-relative-import-paths";
 import sequence from "eslint-plugin-sequence";
 import path from "node:path";
 import { fileURLToPath as fileUrlToPath } from "node:url";
@@ -12,7 +13,7 @@ const __dirname = path.dirname(__filename);
 const compat = new FlatCompat({
     baseDirectory: __dirname,
     recommendedConfig: js.configs.recommended,
-    allConfig: js.configs.all
+    allConfig: js.configs.all,
 });
 
 export default [
@@ -22,7 +23,8 @@ export default [
         plugins: {
             "@stylistic/ts": stylistic,
             "@typescript-eslint": typescriptEslint,
-            sequence
+            "no-relative-import-paths": noRelativeImportPaths,
+            sequence,
         },
 
         languageOptions: {
@@ -39,25 +41,27 @@ export default [
             "eqeqeq": "error",
             "no-eval": "error",
             "no-implied-eval": "error",
-            "no-restricted-imports": ["error", {
-                patterns: [".*"],
-            }],
             "no-sequences": "error",
             "no-shadow": ["warn", {
                 builtinGlobals: true,
-                hoist: "all"
+                hoist: "all",
             }],
             "no-unneeded-ternary": ["error", {
-                defaultAssignment: false
+                defaultAssignment: false,
             }],
             "no-unused-vars": "off", // very broken for TS features
             "no-void": ["error", {
-                allowAsStatement: true
+                allowAsStatement: true,
             }],
             "radix": "error",
 
+            "no-relative-import-paths/no-relative-import-paths": ["error", {
+                rootDir: "src",
+                prefix: "@adashrodEps",
+            }],
+
             "sequence/logical-expression-complexity": ["warn", {
-                maxHeight: 3
+                maxHeight: 3,
             }],
             "sequence/ordered-import-members": ["error", {
                 sortSpecifiersWithComments: true,
@@ -71,12 +75,12 @@ export default [
             }],
             "sequence/ordered-destructuring": [
                 "error", {
-                    natural: true
-                }
+                    natural: true,
+                },
             ],
         
             "@stylistic/ts/brace-style": ["error", "1tbs", {
-                allowSingleLine: true
+                allowSingleLine: true,
             }],
             "@stylistic/ts/comma-dangle": ["error", "always-multiline"],
             "@stylistic/ts/comma-spacing": "error",
