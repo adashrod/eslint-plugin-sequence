@@ -169,6 +169,12 @@ describe("strings", () => {
             ["_helloWorld_", ["_hello", "World_"]],
             ["_HelloWorld_", ["_", "Hello", "World_"]],
             ["_HelloWorld", ["_", "Hello", "World"]],
+            ["The30thDay", ["The", "30th", "Day"]],
+            ["ThereAre4Lights", ["There", "Are", "4", "Lights"]],
+            ["ThereAre4000Lights", ["There", "Are", "4000", "Lights"]],
+            ["HEEEYa", ["HEEE", "Ya"]],
+            ["HEEEYaHEY", ["HEEE", "Ya", "HEY"]],
+            ["HEEEYaHey", ["HEEE", "Ya", "Hey"]],
         ] satisfies [string, string[]][];
         testCases.forEach(([s, result]) =>
             it(`returns ${result} for ${s}`, (ctx) => {
@@ -263,6 +269,8 @@ describe("strings", () => {
                 ["A", "b", { ignoreCase: false, natural: false }],
                 ["A", "B", { ignoreCase: false, natural: false }],
                 ["a", "B", { ignoreCase: true, natural: false }],
+                ["key10", "key5", { ignoreCase: false, natural: false }],
+                ["Key10", "key5", { ignoreCase: true, natural: false }],
                 ["key5", "key10", { ignoreCase: false, natural: true }],
                 ["key5", "Key10", { ignoreCase: true, natural: true }],
             ] satisfies ScTestCase[];
@@ -280,6 +288,8 @@ describe("strings", () => {
                 ["b", "A", { ignoreCase: false, natural: false }],
                 ["B", "A", { ignoreCase: false, natural: false }],
                 ["B", "a", { ignoreCase: true, natural: false }],
+                ["key5", "key10", { ignoreCase: false, natural: false }],
+                ["key5", "Key10", { ignoreCase: true, natural: false }],
                 ["key10", "key5", { ignoreCase: false, natural: true }],
                 ["Key10", "key5", { ignoreCase: true, natural: true }],
             ] satisfies ScTestCase[];
