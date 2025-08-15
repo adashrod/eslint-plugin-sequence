@@ -303,7 +303,7 @@ function create(context: Rule.RuleContext): Rule.RuleListener {
     function buildNodePath(node: Rule.Node): string {
         const path: unknown[] = [];
         let n = node;
-        while (n !== null) {
+        while (n !== null && n !== undefined) {
             path.unshift(n.type);
             n = n.parent;
         }
