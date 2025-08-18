@@ -31,16 +31,21 @@ import sequence from "eslint-plugin-sequence";
 
 ...
 
-        plugins: [
+        plugins: {
             sequence
-        ],
+        },
         rules: {
             "sequence/ordered-imports-by-path": [
                 "error", {
                     ignoreCase: true,
                     sortSideEffectsFirst: true,
                     allowSeparateGroups: true,
-                    sortTypeImportsFirst: true
+                    sortTypeImportsFirst: true,
+                    groups: [
+                        "node:.*",
+                        "the_rest",
+                        "@myApp/.*"
+                    ]
                 }
             ],
             "sequence/ordered-import-members": [

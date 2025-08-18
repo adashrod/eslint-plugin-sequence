@@ -1,3 +1,5 @@
+/* global console */
+
 import type { AST as Ast, Rule } from "eslint";
 import type { ImportDeclaration, Program } from "estree";
 
@@ -8,13 +10,18 @@ type Config = {
     allowSeparateGroups: boolean;
     sortSideEffectsFirst: boolean;
     sortTypeImportsFirst: boolean | undefined;
+    groups: Array<string>;
 };
+
+const THE_REST_GROUP_NAME = "THE_REST";
+const SIDE_EFFECTS_GROUP_NAME = "SIDE_EFFECTS";
 
 const DEFAULT_PROPERTIES: Config = {
     ignoreCase: false,
     allowSeparateGroups: true,
     sortSideEffectsFirst: false,
     sortTypeImportsFirst: undefined,
+    groups: [],
 };
 
 /**
@@ -42,6 +49,13 @@ const meta: Rule.RuleMetaData = {
                 type: "boolean",
                 default: DEFAULT_PROPERTIES.allowSeparateGroups,
             },
+            groups: {
+                type: "array",
+                items: {
+                    type: "string",
+                },
+                default: DEFAULT_PROPERTIES.groups,
+            },
             sortSideEffectsFirst: {
                 type: "boolean",
                 default: DEFAULT_PROPERTIES.sortSideEffectsFirst,
@@ -57,13 +71,17 @@ const meta: Rule.RuleMetaData = {
     fixable: "code",
 
     messages: {
-        sortSideEffectsFirst: "Sort side-effects-only modules before others." +
+        sortSideEffectsFirst:
+            "Sort side-effects-only modules before others. " +
             "`{{declarationA}}` should come before `{{declarationB}}`",
         sortImportsByPath:
             "Sort imports alphabetically by path. `{{declarationA}}` should come before `{{declarationB}}`",
         sortTypeImports:
             "Type imports should be sorted {{typeStyle}} value imports. " +
             "`{{declarationA}}` should come before `{{declarationB}}`",
+        wrongGroup:
+            "{{declaration}} should be in group `{{correctGroupLabel}}` (#{{correctGroupIndex}}) " +
+            "but is in group `{{actualGroupLabel}}` (#{{actualGroupIndex}})",
     },
 };
 
@@ -74,6 +92,28 @@ type TypeCapableImportDeclaration = ImportDeclaration & {
 function create(context: Rule.RuleContext): Rule.RuleListener {
     const cfg = initializeConfig(context.options, DEFAULT_PROPERTIES),
         sourceCode = context.sourceCode;
+
+    const hasTheRestGroup = cfg.groups.some(g => g === THE_REST_GROUP_NAME);
+    let usingGroups = cfg.groups.length > 1 && hasTheRestGroup && cfg.allowSeparateGroups;
+
+    function logWarning(message: string): void {
+        console.warn(message);
+    }
+
+    if (cfg.groups.length > 0) {
+        if (!cfg.allowSeparateGroups) {
+            logWarning("groups is set, but allowSeparateGroups is false; ignoring groups");
+        }
+        if (!hasTheRestGroup) {
+            logWarning("groups is set, but THE_REST group is not present; ignoring groups");
+            usingGroups = false;
+        }
+    }
+    const groupCounts = cfg.groups
+        .reduce((acc, group) => { acc[group] = (acc[group] ?? 0) + 1; return acc; }, {} as Record<string, number>);
+    if (Object.values(groupCounts).some(count => count > 1)) {
+        logWarning("groups contains duplicate group names; ignoring duplicate group names");
+    }
 
     /**
      * for comparing to current node
@@ -176,6 +216,119 @@ function create(context: Rule.RuleContext): Rule.RuleListener {
         return allImports.slice(firstIndex, lastIndex + 1);
     }
 
+    function getAllImports(node: ImportDeclaration & Rule.NodeParentExtension): ImportDeclaration[] {
+        return (node.parent as Program as Ast.Program)
+            .body.filter((aBodyNode) => aBodyNode.type === "ImportDeclaration") as ImportDeclaration[];
+    }
+
+    function partitionImportsIntoGroups(imports: ImportDeclaration[]): ImportDeclaration[][] {
+        if (imports.length === 0) {
+            return [];
+        }
+        const groups: ImportDeclaration[][] = [[imports[0]]];
+        for (let importIndex = 1; importIndex < imports.length; importIndex++) {
+            const importA = imports[importIndex - 1];
+            const importB = imports[importIndex];
+            if (nodesAreAdjacent(importA, importB)) {
+                groups[groups.length - 1].push(importB);
+            } else {
+                groups.push([importB]);
+            }
+        }
+        return groups;
+    }
+
+    /**
+     * Sorts all imports into groups based on the regexes in cfg.groups; does not sort imports within a group
+     *
+     * @param imports an array of ImportDeclaration nodes
+     * @returns an array of ImportDeclaration nodes, sorted into groups based on the regexes in cfg.groups
+     */
+    function sortAllImportsIntoGroups(imports: ImportDeclaration[], effectiveGroups: string[]): ImportDeclaration[][] {
+        const groups: ImportDeclaration[][] = Array(effectiveGroups.length).fill(0).map(() => []);
+        const groupRegexes = getGroupRegexes(effectiveGroups);
+        for (const importDecl of imports) {
+            if (cfg.sortSideEffectsFirst && isSideEffectsModule(importDecl)) {
+                groups[getSideEffectsGroupIndex(effectiveGroups)].push(importDecl);
+                continue;
+            }
+            const path = getPathName(importDecl);
+            const groupIndex = groupRegexes.findIndex(g => g instanceof RegExp && g.test(path));
+            if (groupIndex === -1) {
+                groups[getTheRestGroupIndex(effectiveGroups)].push(importDecl);
+            } else {
+                groups[groupIndex].push(importDecl);
+            }
+        }
+        return groups;
+    }
+
+    /**
+     * Returns the groups from cfg.groups with some filtering
+     * SIDE_EFFECTS is added if sortSideEffectsFirst==true and there is at least one side effects module import
+     * THE_REST is retained if there is at least one import that does not match any regex
+     * regex groups are retained if there is at least one import that matches the regex
+     *
+     * @param allImports an array of ImportDeclaration nodes
+     * @returns an array of strings, the groups from cfg.groups with some filtering
+     */
+    function getEffectiveGroups(allImports: ImportDeclaration[]): string[] {
+        const effectiveGroups = [SIDE_EFFECTS_GROUP_NAME, ...cfg.groups]
+            // deduplicate effectiveGroups while maintaining the order
+            .filter((group, idx, arr) => arr.indexOf(group) === idx);
+        const groupRegexes = getGroupRegexes(effectiveGroups);
+
+        // filter out groups that are not represented in the imports
+        return effectiveGroups.filter((group, i) => {
+            const groupRegex = groupRegexes[i];
+            if (group === THE_REST_GROUP_NAME) {
+                // keep the rest group only if there is at least one import that does not match any regex
+                // side effects imports should be excluded from the rest bucket if sortSideEffectsFirst==true
+                const allRegexes = groupRegexes.filter(g => g instanceof RegExp);
+                const atLeastOneImportForTheRestBucket =
+                    allImports.some(importDecl => {
+                        const importIsInTheRestBucketByPath = !allRegexes.some(gre => gre.test(getPathName(importDecl)));
+                        const importIsInSideEffectsBucket = cfg.sortSideEffectsFirst && isSideEffectsModule(importDecl);
+                        return importIsInTheRestBucketByPath && !importIsInSideEffectsBucket;
+                    });
+                return atLeastOneImportForTheRestBucket;
+            } else if (group === SIDE_EFFECTS_GROUP_NAME) {
+                // keep the side effects group only if sortSideEffectsFirst==true and there is at least one side effects module import
+                return cfg.sortSideEffectsFirst && allImports.some(isSideEffectsModule);
+            }
+            // regex: keep the group if there is at least one import that matches the regex
+            return allImports.some(importDecl => groupRegex instanceof RegExp && groupRegex.test(getPathName(importDecl)));
+        });
+    }
+
+    function getSideEffectsGroupIndex(effectiveGroups: string[]): number {
+        return effectiveGroups.indexOf(SIDE_EFFECTS_GROUP_NAME);
+    }
+
+    function getTheRestGroupIndex(effectiveGroups: string[]): number {
+        return effectiveGroups.indexOf(THE_REST_GROUP_NAME);
+    }
+
+    function getGroupRegexes(effectiveGroups: string[]): (RegExp | null)[] {
+        return effectiveGroups
+            .map(g => g === THE_REST_GROUP_NAME || g === SIDE_EFFECTS_GROUP_NAME ? null : new RegExp(g));
+    }
+
+    function getCorrectGroupIndex(importDecl: ImportDeclaration & Rule.NodeParentExtension, effectiveGroups: string[]): number {
+        if (cfg.sortSideEffectsFirst && isSideEffectsModule(importDecl)) {
+            // in the current implementation, the side effects group is always the first group, but that might change
+            return getSideEffectsGroupIndex(effectiveGroups);
+        }
+        const groupIndex = getGroupRegexes(effectiveGroups).findIndex(g => g instanceof RegExp && g.test(getPathName(importDecl)));
+        return groupIndex === -1 ? getTheRestGroupIndex(effectiveGroups) : groupIndex;
+    }
+
+    function getActualGroupIndex(importDecl: ImportDeclaration & Rule.NodeParentExtension): number {
+        const allImports = getAllImports(importDecl);
+        const groups = partitionImportsIntoGroups(allImports);
+        return groups.findIndex(g => g.includes(importDecl));
+    }
+
     /**
      * Comparator for sorting ImportDeclaration AstNodes by path
      * Note: if sortSideEffectsFirst is true, this function sorts those earlier in a list than any other imports
@@ -233,6 +386,17 @@ function create(context: Rule.RuleContext): Rule.RuleListener {
     }
 
     /**
+     * Returns true if the import declaration is a side effects module import
+     * (`import "abc-xyz"`)
+     *
+     * @param declaration an ImportDeclaration
+     * @returns true if the import declaration is a side effects module import
+     */
+    function isSideEffectsModule(declaration: ImportDeclaration): boolean {
+        return declaration.specifiers.length === 0;
+    }
+
+    /**
      * If sortSideEffectsFirst is true, and one of the 2 declarations is a side effects module import
      * (`import "abc-xyz"`), return true
      *
@@ -244,22 +408,81 @@ function create(context: Rule.RuleContext): Rule.RuleListener {
         declarationA: ImportDeclaration,
         declarationB: ImportDeclaration
     ): boolean {
-        const leftIsSideEffectsModule = declarationA.specifiers.length === 0;
-        const rightIsSideEffectsModule = declarationB.specifiers.length === 0;
+        const leftIsSideEffectsModule = isSideEffectsModule(declarationA);
+        const rightIsSideEffectsModule = isSideEffectsModule(declarationB);
         return cfg.sortSideEffectsFirst && leftIsSideEffectsModule !== rightIsSideEffectsModule;
+    }
+
+    /**
+     * Returns the text of an import declaration, and following comments, unless the import declaration is the last
+     *
+     * @param declaration an ImportDeclaration
+     * @param lastImport the last ImportDeclaration to care about
+     * @returns the text of the import declaration
+     */
+    function mapDeclarationForFix(declaration: ImportDeclaration, lastImport: ImportDeclaration): string {
+        // ignore comments after the last import because they might semantically be comments
+        // before code following the imports, e.g. class header documentation
+        const commentsAfter = declaration !== lastImport ?
+            sourceCode.getCommentsAfter(declaration) : [];
+        if (commentsAfter.some(c => !c.range)) {
+            throw new Error("range property undefined in Comment; can't fix");
+        }
+        return sourceCode.getText().slice(declaration.range![0],
+            (commentsAfter.length > 0) ?
+                commentsAfter[commentsAfter.length - 1].range![1] :
+                declaration.range![1]);
     }
 
     return {
         ImportDeclaration: (node: ImportDeclaration & Rule.NodeParentExtension): void => {
+            let reportedWrongGroup = false;
+            if (usingGroups) {
+                // cfg.allowSeparateGroups is implicitly true here
+                const allImports = getAllImports(node);
+                const effectiveGroups = getEffectiveGroups(allImports);
+                const groups = sortAllImportsIntoGroups(allImports, effectiveGroups);
+                const correctGroupIndex = getCorrectGroupIndex(node, effectiveGroups);
+                const actualGroupIndex = getActualGroupIndex(node);
+                if (correctGroupIndex !== actualGroupIndex) {
+                    reportedWrongGroup = true;
+                    context.report({
+                        node,
+                        messageId: "wrongGroup",
+                        data: {
+                            declaration: getPathName(node),
+                            correctGroupLabel: effectiveGroups[correctGroupIndex],
+                            correctGroupIndex: String(correctGroupIndex),
+                            actualGroupLabel: actualGroupIndex >= effectiveGroups.length ?
+                                "<out of bounds>" :
+                                effectiveGroups[actualGroupIndex],
+                            actualGroupIndex: String(actualGroupIndex),
+                        },
+                        fix(fixer: Rule.RuleFixer) {
+                            const originalLastImport = allImports[allImports.length - 1];
+                            const replacementText = groups.map(group => group
+                                .slice()
+                                .sort(importDeclarationComparator)
+                                .map(declaration => mapDeclarationForFix(declaration, originalLastImport))
+                                .join("\n")
+                            ).join("\n\n");
+                            return fixer.replaceTextRange([allImports[0].range![0], originalLastImport.range![1]],
+                                replacementText);
+                        },
+                    });
+                }
+            }
+
             if (previousDeclaration && cfg.allowSeparateGroups && !nodesAreAdjacent(previousDeclaration, node)) {
                 // reset for next group
                 previousDeclaration = null;
             }
 
             if (previousDeclaration !== null &&
-                    typeof getPathName(previousDeclaration) === "string" &&
-                    typeof getPathName(node) === "string" &&
-                    importDeclarationComparator(previousDeclaration, node) > 0) {
+                typeof getPathName(previousDeclaration) === "string" &&
+                typeof getPathName(node) === "string" &&
+                importDeclarationComparator(previousDeclaration, node) > 0
+            ) {
                 const importGroup = getGroupOfAdjacentImports(node);
                 let messageId, nameA, nameB, typeStyle = "";
                 if (shouldReportFullImport(node, previousDeclaration)) {
@@ -285,25 +508,19 @@ function create(context: Rule.RuleContext): Rule.RuleListener {
                         typeStyle,
                     },
                     fix(fixer: Rule.RuleFixer) {
+                        if (reportedWrongGroup) {
+                            // if there are wrongGroup errors, then that fixer will move the imports to the correct
+                            // groups, and sort the groups, which addresses all the errors. We don't want conflicts
+                            // with the below fixer. Applying both fixers causes incorrect output.
+                            return null;
+                        }
                         if (importGroup.some(d => !d.range)) {
                             throw new Error("range property undefined in ImportDeclaration(s); can't fix");
                         }
                         const originalLastImport = importGroup[importGroup.length - 1];
                         const replacementText = importGroup.slice()
                             .sort(importDeclarationComparator)
-                            .map(declaration => {
-                                // ignore comments after the last import because they might semantically be comments
-                                // before code following the imports, e.g. class header documentation
-                                const commentsAfter = declaration !== originalLastImport ?
-                                    sourceCode.getCommentsAfter(declaration) : [];
-                                if (commentsAfter.some(c => !c.range)) {
-                                    throw new Error("range property undefined in Comment; can't fix");
-                                }
-                                return sourceCode.getText().slice(declaration.range![0],
-                                    (commentsAfter.length > 0) ?
-                                        commentsAfter[commentsAfter.length - 1].range![1] :
-                                        declaration.range![1]);
-                            })
+                            .map(declaration => mapDeclarationForFix(declaration, originalLastImport))
                             .join("\n");
                         return fixer.replaceTextRange([importGroup[0].range![0], originalLastImport.range![1]],
                             replacementText);

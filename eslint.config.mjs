@@ -78,7 +78,7 @@ export default [
                     natural: true,
                 },
             ],
-        
+
             "@stylistic/ts/brace-style": ["error", "1tbs", {
                 allowSingleLine: true,
             }],
