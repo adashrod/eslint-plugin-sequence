@@ -67,7 +67,11 @@ export default [
                 sortSpecifiersWithComments: true,
             }],
             "sequence/ordered-imports-by-path": ["error", {
-                sortSideEffectsFirst: true,
+                groups: [
+                    "node:.*",
+                    "THE_REST",
+                    "@adashrodEps/.*",
+                ],
             }],
             "sequence/strict-camel-case": ["error", {
                 allowOneCharWords: "last",

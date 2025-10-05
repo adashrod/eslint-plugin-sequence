@@ -1,9 +1,10 @@
 /* eslint-disable @typescript-eslint/no-floating-promises */
+import { describe, it } from "node:test";
+
 import { parse } from "@typescript-eslint/parser";
 import { RuleTester as TsEsLintRuleTester } from "@typescript-eslint/rule-tester";
 import { ESLintUtils as EsLintUtils } from "@typescript-eslint/utils";
 import { RuleTester as EsLintRuleTester } from "eslint";
-import { describe, it } from "node:test";
 
 import strictCamelCaseRule from "@adashrodEps/lib/rules/strict-camel-case";
 

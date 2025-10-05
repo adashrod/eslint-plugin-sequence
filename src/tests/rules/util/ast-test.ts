@@ -1,7 +1,8 @@
 /* eslint-disable @typescript-eslint/no-floating-promises */
-import { AST as Ast } from "eslint";
 import { deepStrictEqual, strictEqual } from "node:assert";
 import { describe, it } from "node:test";
+
+import { AST as Ast } from "eslint";
 
 import { findPunctuatorAfter, findPunctuatorBetween } from "@adashrodEps/lib/rules/util/ast";
 

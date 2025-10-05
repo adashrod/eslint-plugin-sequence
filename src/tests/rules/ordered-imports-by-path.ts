@@ -1,7 +1,8 @@
 /* eslint-disable @typescript-eslint/no-floating-promises */
+import { describe, it } from "node:test";
+
 import { parse } from "@typescript-eslint/parser";
 import { RuleTester } from "eslint";
-import { describe, it } from "node:test";
 
 import orderedImportsByPathRule from "@adashrodEps/lib/rules/ordered-imports-by-path";
 

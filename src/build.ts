@@ -1,5 +1,5 @@
-import fs from "fs";
 import console from "node:console";
+import fs from "node:fs";
 
 const distDir = "dist";
 const srcPrefix = "src/";

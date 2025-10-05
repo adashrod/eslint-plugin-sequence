@@ -1,8 +1,9 @@
 /* eslint-disable @typescript-eslint/no-floating-promises */
-import { AST as Ast, Rule, SourceCode } from "eslint";
-import type { AssignmentProperty, Identifier, ImportSpecifier, Node } from "estree";
 import { deepStrictEqual } from "node:assert";
 import { describe, it } from "node:test";
+
+import { AST as Ast, Rule, SourceCode } from "eslint";
+import type { AssignmentProperty, Identifier, ImportSpecifier, Node } from "estree";
 
 import { fixUnsortedKeysWithComments } from "@adashrodEps/lib/rules/util/fix";
 import { StringCompareOptions } from "@adashrodEps/lib/rules/util/strings";

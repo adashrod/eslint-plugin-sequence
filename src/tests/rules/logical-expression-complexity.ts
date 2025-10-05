@@ -1,6 +1,7 @@
 /* eslint-disable @typescript-eslint/no-floating-promises */
-import { RuleTester } from "eslint";
 import { describe, it } from "node:test";
+
+import { RuleTester } from "eslint";
 
 import logicalExpressionComplexityRule from "@adashrodEps/lib/rules/logical-expression-complexity";
 

@@ -1,3 +1,5 @@
+import console from "node:console";
+
 import type { Rule } from "eslint";
 import type {
     Identifier,
@@ -7,7 +9,6 @@ import type {
     PropertyDefinition,
     VariableDeclaration,
 } from "estree";
-import console from "node:console";
 
 import { initializeConfig } from "@adashrodEps/lib/rules/util/eslint";
 import { objectToString } from "@adashrodEps/lib/rules/util/serialization";
