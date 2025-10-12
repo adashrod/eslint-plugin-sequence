@@ -68,6 +68,7 @@ const meta: Rule.RuleMetaData = {
             binaryOperators: {
                 type: "array",
                 items: {
+                    type: "string",
                     enum: [
                         BinaryOperatorAsEnum.EQUALS,
                         BinaryOperatorAsEnum.STRICT_EQUALS,

@@ -92,6 +92,7 @@ const meta: Rule.RuleMetaData = {
             ignoreSingleWordsIn: {
                 type: "array",
                 items: {
+                    type: "string",
                     enum: [
                         IgnoreSingleWordsIn.ENUM_MEMBER,
                         IgnoreSingleWordsIn.FIRST_CLASS_CONSTANT,
