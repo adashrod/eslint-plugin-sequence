@@ -41,3 +41,4 @@ copyDir(`${srcPrefix}docs`);
 copyFile("package.json");
 copyFile("README.md");
 copyFile("LICENSE");
+copyFile(".npmrc");
